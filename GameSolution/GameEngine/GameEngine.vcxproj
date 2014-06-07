@@ -1,0 +1,137 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{62F2FD77-859F-4C9F-8344-AC308023B1D6}</ProjectGuid>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <Keyword>ManagedCProj</Keyword>
+    <RootNamespace>GameEngine</RootNamespace>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v110</PlatformToolset>
+    <CLRSupport>false</CLRSupport>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v110</PlatformToolset>
+    <CLRSupport>true</CLRSupport>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <LinkIncremental>true</LinkIncremental>
+    <IntDir>$(Configuration)\obj\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <LinkIncremental>false</LinkIncremental>
+    <IntDir>$(Configuration)\obj\</IntDir>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level2</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>DEBUG_MENUS;DEBUG_SHAPES;ENGINE_EXPORTS;WIN32;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <AdditionalIncludeDirectories>$(SolutionDir)..\GameSolution\Core\include;$(SolutionDir)..\ext\Qt\include\;$(SolutionDir)..\ext\glm\;$(SolutionDir)..\ext\nmnt\include\;$(SolutionDir)..\ext\glew\include\;%(AdditionalIncludeDirectories);$(WindowsSDK_IncludePath)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>opengl32.lib;glew32d.lib;NeumontTools.lib;QtCored4.lib;QtGuid4.lib;QtOpenGLd4.lib;Core.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)Debug;$(SolutionDir)Core\lib;$(SolutionDir)..\GameSolution\Core\lib;$(SolutionDir)..\ext\glew\lib\;$(SolutionDir)..\ext\Qt\lib\;$(SolutionDir)..\ext\nmnt\lib\</AdditionalLibraryDirectories>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions>ENGINE_EXPORTS;WIN32;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <AdditionalIncludeDirectories>$(SolutionDir)..\GameSolution\Core\include;$(SolutionDir)..\ext\Qt\include\;$(SolutionDir)..\ext\glm\;$(SolutionDir)..\ext\nmnt\include\;$(SolutionDir)..\ext\glew\include\;%(AdditionalIncludeDirectories);$(WindowsSDK_IncludePath)</AdditionalIncludeDirectories>
+      <PrecompiledHeaderFile />
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>opengl32.lib;glew32d.lib;NeumontTools.lib;QtCored4.lib;QtGuid4.lib;QtOpenGLd4.lib;Core.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)Debug;$(SolutionDir)Core\lib;$(SolutionDir)..\GameSolution\Core\lib;$(SolutionDir)..\ext\glew\lib\;$(SolutionDir)..\ext\Qt\lib\;$(SolutionDir)..\ext\nmnt\lib\</AdditionalLibraryDirectories>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="AStarDebugger.h" />
+    <ClInclude Include="AutoCheckBox.h" />
+    <ClInclude Include="AutoDebugSlider.h" />
+    <ClInclude Include="AutoLabel.h" />
+    <ClInclude Include="Camera.h" />
+    <ClInclude Include="Connection.h" />
+    <ClInclude Include="DebugMenus.h" />
+    <ClInclude Include="DebugShapes.h" />
+    <ClInclude Include="DebugSlider.h" />
+    <ClInclude Include="Decision.h" />
+    <ClInclude Include="Engine.h" />
+    <ClInclude Include="ExportHeader.h" />
+    <ClInclude Include="GeneralGLWindow.h" />
+    <ClInclude Include="GLHelper.h" />
+    <ClInclude Include="State.h" />
+    <ClInclude Include="Timer.h" />
+    <ClInclude Include="VectorEditWidget.h" />
+    <ClInclude Include="WayMapLevel.h" />
+    <ClInclude Include="WayPath.h" />
+    <ClInclude Include="WayPoint.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="AStarDebugger.cpp" />
+    <ClCompile Include="AutoCheckBox.cpp" />
+    <ClCompile Include="AutoCheckBox_moc.cpp" />
+    <ClCompile Include="AutoDebugSlider.cpp" />
+    <ClCompile Include="AutoDebugSlider_moc.cpp" />
+    <ClCompile Include="AutoLabel.cpp" />
+    <ClCompile Include="AutoLabel_moc.cpp" />
+    <ClCompile Include="DebugMenus.cpp" />
+    <ClCompile Include="DebugShapes.cpp" />
+    <ClCompile Include="DebugSlider.cpp" />
+    <ClCompile Include="DebugSlider_moc.cpp" />
+    <ClCompile Include="Decision.cpp" />
+    <ClCompile Include="dllmain.cpp" />
+    <ClCompile Include="Engine.cpp" />
+    <ClCompile Include="GeneralGLWindow.cpp" />
+    <ClCompile Include="GeneralGLWindow_moc.cpp" />
+    <ClCompile Include="State.cpp" />
+    <ClCompile Include="Timer.cpp" />
+    <ClCompile Include="WayMapLevel.cpp" />
+    <ClCompile Include="WayPath.cpp" />
+    <ClCompile Include="WayPoint.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="DebugShapes.inl" />
+    <None Include="GeneralGLWindow.inl" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

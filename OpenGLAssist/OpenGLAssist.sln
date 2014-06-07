@@ -1,0 +1,26 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "OpenGLAssist", "OpenGLAssist\OpenGLAssist.vcxproj", "{8A0B0A6C-67BF-4474-BD88-A46341B10399}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Engine", "..\Engine\Engine.vcxproj", "{82414E8A-907C-4B77-92E7-75AE8975C84D}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{8A0B0A6C-67BF-4474-BD88-A46341B10399}.Debug|Win32.ActiveCfg = Debug|Win32
+		{8A0B0A6C-67BF-4474-BD88-A46341B10399}.Debug|Win32.Build.0 = Debug|Win32
+		{8A0B0A6C-67BF-4474-BD88-A46341B10399}.Release|Win32.ActiveCfg = Release|Win32
+		{8A0B0A6C-67BF-4474-BD88-A46341B10399}.Release|Win32.Build.0 = Release|Win32
+		{82414E8A-907C-4B77-92E7-75AE8975C84D}.Debug|Win32.ActiveCfg = Debug|Win32
+		{82414E8A-907C-4B77-92E7-75AE8975C84D}.Debug|Win32.Build.0 = Debug|Win32
+		{82414E8A-907C-4B77-92E7-75AE8975C84D}.Release|Win32.ActiveCfg = Release|Win32
+		{82414E8A-907C-4B77-92E7-75AE8975C84D}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

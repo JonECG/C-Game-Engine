@@ -1,0 +1,6 @@
+C:\Users\Jon\Desktop\C++ Working Repo\jpearl_cpprepo\ModelOBJtoBinary\ModelOBJtoBinary\bin\Debug\ModelOBJtoBinary.exe.config
+C:\Users\Jon\Desktop\C++ Working Repo\jpearl_cpprepo\ModelOBJtoBinary\ModelOBJtoBinary\bin\Debug\ModelOBJtoBinary.exe
+C:\Users\Jon\Desktop\C++ Working Repo\jpearl_cpprepo\ModelOBJtoBinary\ModelOBJtoBinary\bin\Debug\ModelOBJtoBinary.pdb
+C:\Users\Jon\Desktop\C++ Working Repo\jpearl_cpprepo\ModelOBJtoBinary\ModelOBJtoBinary\obj\Debug\ModelOBJtoBinary.exe
+C:\Users\Jon\Desktop\C++ Working Repo\jpearl_cpprepo\ModelOBJtoBinary\ModelOBJtoBinary\obj\Debug\ModelOBJtoBinary.pdb
+C:\Users\Jon\Desktop\C++ Working Repo\jpearl_cpprepo\ModelOBJtoBinary\ModelOBJtoBinary\obj\Debug\ModelOBJtoBinary.csprojResolveAssemblyReference.cache

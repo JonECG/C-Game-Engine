@@ -1,0 +1,6 @@
+C:\Users\Jon\Desktop\C++ Working Repo\jpearl_cpprepo\ModelOBJtoBinary\BitmapFonttoBinary\bin\Debug\BitmapFonttoBinary.exe.config
+C:\Users\Jon\Desktop\C++ Working Repo\jpearl_cpprepo\ModelOBJtoBinary\BitmapFonttoBinary\bin\Debug\BitmapFonttoBinary.exe
+C:\Users\Jon\Desktop\C++ Working Repo\jpearl_cpprepo\ModelOBJtoBinary\BitmapFonttoBinary\bin\Debug\BitmapFonttoBinary.pdb
+C:\Users\Jon\Desktop\C++ Working Repo\jpearl_cpprepo\ModelOBJtoBinary\BitmapFonttoBinary\obj\Debug\BitmapFonttoBinary.exe
+C:\Users\Jon\Desktop\C++ Working Repo\jpearl_cpprepo\ModelOBJtoBinary\BitmapFonttoBinary\obj\Debug\BitmapFonttoBinary.pdb
+C:\Users\Jon\Desktop\C++ Working Repo\jpearl_cpprepo\ModelOBJtoBinary\BitmapFonttoBinary\obj\Debug\BitmapFonttoBinary.csprojResolveAssemblyReference.cache
