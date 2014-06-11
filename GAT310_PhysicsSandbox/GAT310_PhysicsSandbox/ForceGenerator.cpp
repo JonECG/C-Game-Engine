@@ -75,6 +75,16 @@ void ParticleDrag::updateForceSpecial( Particle *particle, float dt )
 ParticleSpring::ParticleSpring( Particle* other, float length, float stiffness )
 {
 	this->other = other;
+	this->usePosition = false;
+
+	this->length = length;
+	this->stiffness = stiffness;
+}
+
+ParticleSpring::ParticleSpring( glm::vec3 base, float length, float stiffness )
+{
+	this->base = base;
+	this->usePosition = true;
 
 	this->length = length;
 	this->stiffness = stiffness;
@@ -82,7 +92,16 @@ ParticleSpring::ParticleSpring( Particle* other, float length, float stiffness )
 
 void ParticleSpring::updateForceSpecial( Particle *particle, float dt )
 {
-	glm::vec3 springForce = other->position - particle->position;
+	glm::vec3 basePosition;
+	if( usePosition )
+	{
+		basePosition = base;
+	}
+	else
+	{
+		basePosition = other->position;
+	}
+	glm::vec3 springForce = basePosition - particle->position;
 	springForce = glm::normalize( springForce ) * stiffness * ( glm::length( springForce ) - length );
 	particle->addForce( springForce * dt );
 }

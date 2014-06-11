@@ -65,10 +65,13 @@ class ParticleSpring : public ParticleForceGenerator
 {
 public:
 	Particle *other;
+	glm::vec3 base;
+	bool usePosition;
 	float length;
 	float stiffness;
 	
 	ParticleSpring( Particle *other, float length, float stiffness );
+	ParticleSpring( glm::vec3 base, float length, float stiffness );
 	virtual void updateForceSpecial( Particle *particle, float dt );
 };
 
