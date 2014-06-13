@@ -33,18 +33,64 @@ void CollisionDetection::detectCollisions( Particle ** particles, int numberOfPa
 		for( int j = i + 1; j < numberOfParticles; j++ )
 		{
 			glm::vec3 difference = particles[i]->position - particles[j]->position;
-			float penetration = ( particles[i]->mass + particles[j]->mass ) / 2 - glm::length( difference );
+			float penetration = particles[i]->radius + particles[j]->radius - glm::length( difference );
 			if( penetration > 0 )
 			{
 				//std::cout << "Coll" << std::endl;
+
+				Particle *larger, *smaller;
+				if( particles[i]->mass > particles[j]->mass ) 
+				{
+					larger = particles[i];
+					smaller = particles[j];
+				}
+				else
+				{
+					larger = particles[j];
+					smaller = particles[i];
+				}
+				glm::vec3 largerMomentum = larger->mass * larger->velocity;
+
+				float massChunk = smaller->mass;
+
+				if( penetration < smaller->radius )
+				{
+					//std::cout << "lost " << penetration << std::endl << "from " << smaller->radius << " to " << (smaller->radius - penetration) << std::endl;
+					massChunk -= 4 * (smaller->radius - penetration) * (smaller->radius - penetration);
+				}
+
+				largerMomentum += smaller->velocity * massChunk;
+
+				larger->mass += massChunk;
+				smaller->mass -= massChunk;
+
+				larger->velocity = largerMomentum / larger->mass;
 				//contactRegistry->addContact( particles[i], particles[j], glm::normalize( difference ), penetration, restitution );
 			}
 		}
 
-		if( collideWithFloor && particles[i]->position.y <= 0.5f )
+		if( collideWithFloor && ( particles[i]->position.y - particles[i]->radius ) <= -5 )
 		{
 			//std::cout << "Coll" << std::endl;
-			contactRegistry->addContact( particles[i], glm::vec3( 0, 1, 0 ), 0.5 - particles[i]->position.y, restitution );
+			contactRegistry->addContact( particles[i], glm::vec3( 0, 1, 0 ), -5 + particles[i]->radius - particles[i]->position.y, restitution );
+		}
+
+		if( collideWithFloor && ( particles[i]->position.y + particles[i]->radius ) >= 5 )
+		{
+			//std::cout << "Coll" << std::endl;
+			contactRegistry->addContact( particles[i], glm::vec3( 0, -1, 0 ), 5 - particles[i]->radius - particles[i]->position.y, restitution );
+		}
+
+		if( collideWithFloor && ( particles[i]->position.x - particles[i]->radius ) <= -5 )
+		{
+			//std::cout << "Coll" << std::endl;
+			contactRegistry->addContact( particles[i], glm::vec3( 1, 0, 0 ), -5 + particles[i]->radius - particles[i]->position.x, restitution );
+		}
+
+		if( collideWithFloor && ( particles[i]->position.x + particles[i]->radius ) >= 5 )
+		{
+			//std::cout << "Coll" << std::endl;
+			contactRegistry->addContact( particles[i], glm::vec3( -1, 0, 0 ), 5 - particles[i]->radius - particles[i]->position.x, restitution );
 		}
 	}
 }

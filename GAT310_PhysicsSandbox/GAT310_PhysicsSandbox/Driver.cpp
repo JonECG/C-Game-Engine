@@ -16,6 +16,7 @@
 #include "Lab13Gui.h"
 #include "Lab14Gui.h"
 #include "Lab15Gui.h"
+#include "Lab16Gui.h"
 
 #include "DebugMenus.h"
 
@@ -40,7 +41,8 @@ int main(int argc, char * argv[] )
 	//Lab12Gui * currentLab = new Lab12Gui();
 	//Lab13Gui * currentLab = new Lab13Gui();
 	//Lab14Gui * currentLab = new Lab14Gui();
-	Lab15Gui * currentLab = new Lab15Gui();
+	//Lab15Gui * currentLab = new Lab15Gui();
+	Lab16Gui * currentLab = new Lab16Gui();
 
 	currentLab->initialize();
 	currentLab->show();
