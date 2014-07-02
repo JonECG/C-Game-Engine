@@ -256,17 +256,17 @@ GeneralGlWindow::ShaderInfo* GeneralGlWindow::addShaderInfo( const char* vertexS
 	return &shaderInfos[ currentShaderIndex-1 ];
 }
 
-GeneralGlWindow::Renderable* GeneralGlWindow::addRenderable( GeometryInfo* whatGeometry, const glm::mat4& whereMatrix, ShaderInfo* howShaders, TextureInfo* texture = nullptr)
+GeneralGlWindow::Renderable* GeneralGlWindow::addRenderable( GeometryInfo* whatGeometry, const glm::mat4& whereMatrix, ShaderInfo* howShaders, TextureInfo* texture, TextureInfo* trans )
 {
 	static int currentRenderableIndex = 0;
 
-	renderables[ currentRenderableIndex ] = Renderable( whatGeometry, whereMatrix, howShaders, texture );
+	renderables[ currentRenderableIndex ] = Renderable( whatGeometry, whereMatrix, howShaders, texture, trans );
 	currentRenderableIndex++;
 
 	return &renderables[ currentRenderableIndex-1 ];
 }
 
-GeneralGlWindow::Renderable* GeneralGlWindow::replaceRenderable( Renderable *renderable, GeometryInfo* whatGeometry, const glm::mat4& whereMatrix, ShaderInfo* howShaders, TextureInfo* texture = nullptr)
+GeneralGlWindow::Renderable* GeneralGlWindow::replaceRenderable( Renderable *renderable, GeometryInfo* whatGeometry, const glm::mat4& whereMatrix, ShaderInfo* howShaders, TextureInfo* texture )
 {
 	/*static int currentRenderableIndex = 0;
 
@@ -408,7 +408,10 @@ void GeneralGlWindow::Renderable::draw()
 	{
 		glUseProgram( howShader->shaderProgramID );
 
-		GLint loc = glGetUniformLocation( howShader->shaderProgramID, "useTexture");
+		GLint loc;
+
+		//Color Map
+		loc = glGetUniformLocation( howShader->shaderProgramID, "useTexture");
 
 		if( texture != NULL )
 		{
@@ -421,6 +424,28 @@ void GeneralGlWindow::Renderable::draw()
 
 			loc = glGetUniformLocation( howShader->shaderProgramID, "tex");
 			glUniform1i(loc, 0);
+		}
+		else
+		{
+			if (loc != -1)
+				glUniform1i(loc, 0);
+		}
+
+
+		//Transparency Map
+		loc = glGetUniformLocation( howShader->shaderProgramID, "useTransMap");
+
+		if( trans != NULL )
+		{
+			if (loc != -1)
+				glUniform1i(loc, 1);
+
+			glActiveTexture( GL_TEXTURE1 );
+
+			glBindTexture( GL_TEXTURE_2D, trans->textureID );
+
+			loc = glGetUniformLocation( howShader->shaderProgramID, "trans");
+			glUniform1i(loc, 1);
 		}
 		else
 		{

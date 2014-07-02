@@ -112,11 +112,13 @@ public:
 		ShaderInfo* howShader;
 		glm::mat4 where;
 		bool visible;
+		TextureInfo* trans;
 		TextureInfo* texture;
+		
 
 		inline Renderable();
 
-		inline Renderable( GeometryInfo* whatGeometry, glm::mat4 whereMatrix, ShaderInfo* howShader, TextureInfo* texture = nullptr );
+		inline Renderable( GeometryInfo* whatGeometry, glm::mat4 whereMatrix, ShaderInfo* howShader, TextureInfo* texture = nullptr, TextureInfo* trans = nullptr );
 
 		void ENGINE_SHARED draw();
 
@@ -138,8 +140,8 @@ public:
 	
 	ShaderInfo* addShaderInfo( const char* vertexShaderFile, const char* fragmentShaderFile);
 	
-	Renderable* addRenderable( GeometryInfo* whatGeometry, const glm::mat4& whereMatrix, ShaderInfo* howShaders, TextureInfo* texture);
-	Renderable* replaceRenderable( Renderable* oldRenderable, GeometryInfo* whatGeometry, const glm::mat4& whereMatrix, ShaderInfo* howShaders, TextureInfo* texture);
+	Renderable* addRenderable( GeometryInfo* whatGeometry, const glm::mat4& whereMatrix, ShaderInfo* howShaders, TextureInfo* texture = nullptr, TextureInfo* trans = nullptr);
+	Renderable* replaceRenderable( Renderable* oldRenderable, GeometryInfo* whatGeometry, const glm::mat4& whereMatrix, ShaderInfo* howShaders, TextureInfo* texture = nullptr);
 
 	GeometryInfo* loadFile( const char* path );
 

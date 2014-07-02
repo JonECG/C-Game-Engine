@@ -74,13 +74,14 @@ GeneralGlWindow::Renderable::Renderable()
 	visible = true;
 }
 
-GeneralGlWindow::Renderable::Renderable( GeometryInfo* whatGeometry, glm::mat4 whereMatrix, ShaderInfo* howShader, TextureInfo* texture ) 
+GeneralGlWindow::Renderable::Renderable( GeometryInfo* whatGeometry, glm::mat4 whereMatrix, ShaderInfo* howShader, TextureInfo* texture, TextureInfo* trans ) 
 { 
 	numUniformParameters = 0;
 	this->whatGeometry = whatGeometry;
 	where = whereMatrix;
 	this->howShader = howShader;
 	this->texture = texture;
+	this->trans = trans;
 	visible = true;
 }
 
