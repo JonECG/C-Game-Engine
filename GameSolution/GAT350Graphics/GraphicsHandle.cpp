@@ -15,6 +15,8 @@ glm::vec3 shipPos;
 float fps, delta;
 float timey;
 
+const char * stringy = "This is a string";
+
 GeneralGlWindow::ShaderInfo *questionShad;
 GeneralGlWindow::Renderable * character, *bushRend, *groundRend, *skyRend, *questionBlock;
 
@@ -22,6 +24,9 @@ void GraphicsHandle::init()
 {
 	glEnable( GL_TEXTURE_2D );
 	glEnable( GL_DEPTH_TEST );
+
+	//DebugMenus::inject( layout() );
+	//DebugMenus::menu->show();
 
 	textShad = addShaderInfo( "res/texture.vert", "res/texture.frag" );
 	questionShad = addShaderInfo( "res/texture.vert", "res/question.frag" );
@@ -81,8 +86,12 @@ void GraphicsHandle::init()
 
 	addUniformParameter( questionShad, "timey", PT_FLOAT, &timey);
 
-	/*DebugMenus::watchFloat( "Red score", env->redScore );
-	DebugMenus::watchFloat( "Blue score", env->blueScore );*/
+	DebugMenus::watchFloat( "Time1", timey );
+	DebugMenus::watchFloat( "Time2", timey );
+	DebugMenus::watchFloat( "Time3", timey, "Not default" );
+	DebugMenus::watchFloat( "Time4", timey, "Not default" );
+	DebugMenus::watchText( "Some Text", stringy, "Not default" );
+	DebugMenus::watchFloat( "Time5", timey );
 }
 
 float angle = 0;

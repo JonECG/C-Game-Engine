@@ -50,6 +50,7 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <AdditionalIncludeDirectories>$(SolutionDir)\Core\include;$(SolutionDir)\GameEngine;$(SolutionDir)..\ext\Qt\include\;$(SolutionDir)..\ext\glm\;$(SolutionDir)..\ext\nmnt\include\;$(SolutionDir)..\ext\glew\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>DEBUG_MENUS;_MBCS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>

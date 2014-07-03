@@ -10,7 +10,7 @@ class ENGINE_SHARED AutoLabel : public QWidget
 	Q_OBJECT
 
 	QLabel* label;
-	void * data;
+	const void * data;
 	bool isFloat;
 	QTimer timer;
 
@@ -18,6 +18,7 @@ class ENGINE_SHARED AutoLabel : public QWidget
 		void update();
 
 	public:
+		AutoLabel( const char * name, const char * const * data );
 		AutoLabel( const char * name, float * data );
 };
 

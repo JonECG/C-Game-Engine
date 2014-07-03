@@ -12,8 +12,13 @@ int main( int argc, char* argv[] )
 	
 	DebugMenus::menu = new DebugMenus();
 
+	
+
 	baseWidg->resize( 640, 640 );
 	baseWidg->show();
+
+	DebugMenus::inject( baseWidg->layout() );
+	DebugMenus::menu->show();
 
 	return app.exec();
 }

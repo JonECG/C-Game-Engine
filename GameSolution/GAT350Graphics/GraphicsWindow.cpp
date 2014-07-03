@@ -13,4 +13,5 @@ GraphicsWindow::GraphicsWindow()
 	handle = new GraphicsHandle();
 
 	setCentralWidget( handle );	
+	//DebugMenus::inject( layout() );
 }

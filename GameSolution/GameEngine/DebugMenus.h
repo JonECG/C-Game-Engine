@@ -1,5 +1,6 @@
 #pragma once
 #include <QtGui\qwidget>
+#include <QtGui\qtabwidget.h>
 #include "AutoCheckBox.h"
 #include "DebugSlider.h"
 #include "VectorEditWidget.h"
@@ -9,41 +10,81 @@
 
 class ENGINE_SHARED DebugMenus : public QWidget
 {
-public:
+private:
+	QTabWidget* widg;
+	int currentTab;
+	QWidget* tabs[10];
+	const char* names[10];
 
+	inline QWidget* fetchTab( const char* tabName )
+	{
+		QWidget* result = nullptr;
+		for( int i = 0; i < currentTab; i++ )
+		{
+			if ( std::strcmp( names[i], tabName ) == 0 )
+			{
+				result = tabs[i];
+			}
+		}
+
+		if( result == nullptr )
+		{
+			result = new QWidget();
+			widg->addTab( result, tabName );
+			tabs[currentTab] = result;
+			names[currentTab] = tabName;
+			result->setLayout( new QVBoxLayout() );
+			currentTab++;
+		}
+		return result;
+	}
+public:
 	static DebugMenus *menu;
+
+	
 
 #ifdef DEBUG_MENUS
 
 	inline DebugMenus()
 	{
+		currentTab = 0;
 		QVBoxLayout *mainLayout = new QVBoxLayout();
+		widg = new QTabWidget();
+		resize( 500, 200 );
+
 		setLayout(mainLayout);
+		layout()->addWidget( widg );
 	}
 
-	inline static void watchFloat( char* description, float& data )
+	inline static void watchFloat( char* description, float& data, const char* tabName = "<DEFAULT>" )
 	{
 		float* dataPointer = &data;
-		menu->layout()->addWidget( new AutoLabel( description, dataPointer ) );
+		menu->fetchTab(tabName)->layout()->addWidget( new AutoLabel( description, dataPointer ) );
 	}
 
-	inline static void slideFloat( char* description, float& data, float min = 0.0f, float max = 1.0f )
+	inline static void watchText( char* description, const char * const & data, const char* tabName = "<DEFAULT>" )
+	{
+		const char * const * dataPointer = &data;
+		menu->fetchTab(tabName)->layout()->addWidget( new AutoLabel( description, dataPointer ) );
+	}
+
+	inline static void slideFloat( char* description, float& data, float min = 0.0f, float max = 1.0f, const char* tabName = "<DEFAULT>" )
 	{
 		float* dataPointer = &data;
-		menu->layout()->addWidget( new VectorEditWidget( description, dataPointer, min, max ) );
+		menu->fetchTab(tabName)->layout()->addWidget( new VectorEditWidget( description, dataPointer, min, max ) );
 	}
 
 	template <class Vect>
-	inline static void slideVector( char* description, Vect& data, float min = 0.0f, float max = 1.0f )
+	inline static void slideVector( char* description, Vect& data, float min = 0.0f, float max = 1.0f, const char* tabName = "<DEFAULT>" )
 	{
 		Vect* dataPointer = &data;
-		menu->layout()->addWidget( new VectorEditWidget( description, dataPointer, min, max ) );
+		menu->fetchTab(tabName)->layout()->addWidget( new VectorEditWidget( description, dataPointer, min, max ) );
 	}
 
-	inline static void toggleBool( char* description, bool& data )
+	inline static void toggleBool( char* description, bool& data, const char* tabName = "<DEFAULT>" )
 	{
 		bool* dataPointer = &data;
-		menu->layout()->addWidget(new AutoCheckBox( description, dataPointer ) );
+		menu->fetchTab(tabName)->layout()->addWidget(new AutoCheckBox( description, dataPointer ) );
 	}
 
 	inline static void update()
@@ -64,14 +105,16 @@ public:
 
 	inline DebugMenus(){}
 
-	inline static void watchFloat( char* description, float& data ){}
+	inline static void watchFloat( char* description, float& data, const char* tabName = "<DEFAULT>" ){}
 
-	inline static void slideFloat( char* description, float& data, float min = 0.0f, float max = 1.0f ){}
+	inline static void watchText( char* description, const char * const & data, const char* tabName = "<DEFAULT>" ){}
+
+	inline static void slideFloat( char* description, float& data, float min = 0.0f, float max = 1.0f, const char* tabName = "<DEFAULT>" ){}
 
 	template <class Vect>
-	inline static void slideVector( char* description, Vect& data, float min = 0.0f, float max = 1.0f ){}
+	inline static void slideVector( char* description, Vect& data, float min = 0.0f, float max = 1.0f, const char* tabName = "<DEFAULT>" ){}
 
-	inline static void toggleBool( char* description, bool& data ){}
+	inline static void toggleBool( char* description, bool& data, const char* tabName = "<DEFAULT>" ){}
 
 	inline static void update(){}
 
