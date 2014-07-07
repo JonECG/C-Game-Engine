@@ -20,16 +20,25 @@ const char * stringy = "This is a string";
 GeneralGlWindow::ShaderInfo *questionShad;
 GeneralGlWindow::Renderable * character, *bushRend, *groundRend, *skyRend, *questionBlock;
 
+GeneralGlWindow::ShaderInfo *alphaPotShad;
+GeneralGlWindow::Renderable * pot;
+
+bool showFirstLab, showSecondLab;
+
 void GraphicsHandle::init()
 {
 	glEnable( GL_TEXTURE_2D );
 	glEnable( GL_DEPTH_TEST );
+
+	showFirstLab = false;
+	showSecondLab = false;
 
 	//DebugMenus::inject( layout() );
 	//DebugMenus::menu->show();
 
 	textShad = addShaderInfo( "res/texture.vert", "res/texture.frag" );
 	questionShad = addShaderInfo( "res/texture.vert", "res/question.frag" );
+	alphaPotShad = addShaderInfo( "res/texture.vert", "res/teapotAlpha.frag" );
 
 	GeneralGlWindow::TextureInfo * marioAndWeegee = addTexture( "res/marioAndLuigi.png" );
 	GeneralGlWindow::TextureInfo * marioAndWeegeeTrans = addTexture( "res/marioAndLuigiTrans.png" );
@@ -48,9 +57,13 @@ void GraphicsHandle::init()
 
 	Neumont::ShapeData cubeData = Neumont::ShapeGenerator::makeCube();
 	GeneralGlWindow::GeometryInfo * cubeGeo = addGeometry( cubeData.verts, cubeData.numVerts, cubeData.indices, cubeData.numIndices, GL_TRIANGLES );
+
+	Neumont::ShapeData potData = Neumont::ShapeGenerator::makeTeapot(4,glm::mat4());
+	GeneralGlWindow::GeometryInfo * potGeo = addGeometry( potData.verts, potData.numVerts, potData.indices, potData.numIndices, GL_TRIANGLES );
 	
 	setUpAttribs( charGeo );
 	setUpAttribs( cubeGeo );
+	setUpAttribs( potGeo );
 	character = addRenderable( charGeo, glm::translate( glm::vec3( -2, 0, 2 ) )*glm::rotate( 90.0f, glm::vec3( 1,0,0 ) ) * glm::scale( glm::vec3( 1, 1 , -1 ) ), textShad, marioAndWeegee, marioAndWeegeeTrans );
 	bushRend = addRenderable( charGeo, glm::translate( glm::vec3( -3, 0, 1 ) )*glm::rotate( 90.0f, glm::vec3( 1,0,0 ) ) * glm::scale( glm::vec3( 1, 1 , -1 ) ), textShad, bush, bushTrans );
 	groundRend = addRenderable( charGeo, glm::translate( glm::vec3( 0, -1, 4 ) )*glm::scale( glm::vec3( 4.0f ) ), textShad, ground );
@@ -59,6 +72,7 @@ void GraphicsHandle::init()
 	questionBlock = addRenderable( cubeGeo, glm::translate( glm::vec3( -1, 0.5f, 2 ) )*glm::scale( glm::vec3( 0.2f ) ), questionShad, question, noise );
 	/*character->trans = flagByTexture;*/
 
+	pot = addRenderable( potGeo, glm::translate( glm::vec3( -2, -1, 2 ) )*glm::rotate( -90.0f, glm::vec3( 1,0,0 ) )*glm::scale( glm::vec3( 0.5f ) ), alphaPotShad, noise );
 
 	tightness = 40.0f;
 
@@ -75,6 +89,17 @@ void GraphicsHandle::init()
 	addUniformParameter( textShad, "tightness", PT_FLOAT, (float*)&(tightness) );
 	addUniformParameter( textShad, "eye", PT_VEC4, (float*)&camera.from);
 
+	addUniformParameter( alphaPotShad, "mvp", PT_MAT4, (float*)&camera.mvp );
+	
+	setUniformParameter( alphaPotShad, "amblight", PT_VEC4, (float*)&glm::vec4(0.1f,0.1f,0.1f,1) );
+	setUniformParameter( alphaPotShad, "diffpos", PT_VEC4, (float*)&glm::vec4(3.0f,6.0f,8.0f,1) );
+	setUniformParameter( alphaPotShad, "difflight", PT_VEC4, (float*)&glm::vec4(0.8f,0.8f,0.8f,1));
+	setUniformParameter( alphaPotShad, "specColor", PT_VEC4, (float*)&glm::vec4(0.8f,0.8f,0.8f,1));
+	setUniformParameter( alphaPotShad, "colorInfluence", PT_VEC4, (float*)&glm::vec4(1,1,1,1));
+	addUniformParameter( alphaPotShad, "tightness", PT_FLOAT, (float*)&(tightness) );
+	addUniformParameter( alphaPotShad, "eye", PT_VEC4, (float*)&camera.from);
+
+
 	addUniformParameter( questionShad, "mvp", PT_MAT4, (float*)&camera.mvp );
 	
 	setUniformParameter( questionShad, "amblight", PT_VEC4, (float*)&glm::vec4(0.1f,0.1f,0.1f,1) );
@@ -84,14 +109,11 @@ void GraphicsHandle::init()
 	addUniformParameter( questionShad, "tightness", PT_FLOAT, (float*)&(tightness) );
 	addUniformParameter( questionShad, "eye", PT_VEC4, (float*)&camera.from);
 
+
 	addUniformParameter( questionShad, "timey", PT_FLOAT, &timey);
 
-	DebugMenus::watchFloat( "Time1", timey );
-	DebugMenus::watchFloat( "Time2", timey );
-	DebugMenus::watchFloat( "Time3", timey, "Not default" );
-	DebugMenus::watchFloat( "Time4", timey, "Not default" );
-	DebugMenus::watchText( "Some Text", stringy, "Not default" );
-	DebugMenus::watchFloat( "Time5", timey );
+	DebugMenus::toggleBool( "Show Binary Alpha Lab", showFirstLab, "Binary Alpha" );
+	DebugMenus::toggleBool( "Show Alpha Lab", showSecondLab, "Alpha" );
 }
 
 float angle = 0;
@@ -103,11 +125,29 @@ void GraphicsHandle::paint()
 	glClearColor( 0.5, 0.1, 0.1, 0 );
 	glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 
-	character->draw();
-	bushRend->draw();
-	groundRend->draw();
-	skyRend->draw();
-	questionBlock->draw();
+
+	if( showFirstLab )
+	{
+		character->draw();
+		bushRend->draw();
+		groundRend->draw();
+		skyRend->draw();
+		questionBlock->draw();
+	}
+
+	if( showSecondLab )
+	{
+		groundRend->draw();
+
+		glEnable (GL_BLEND);
+		//glEnable(GL_POLYGON_STIPPLE);
+		glEnable(GL_CULL_FACE);
+		glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		pot->draw();
+		//glDisable(GL_POLYGON_STIPPLE);
+		glDisable(GL_CULL_FACE);
+		glDisable (GL_BLEND);
+	}
 }
 
 glm::vec2 mousePosition = glm::vec2();
