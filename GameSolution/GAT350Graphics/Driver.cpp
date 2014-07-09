@@ -14,7 +14,7 @@ int main( int argc, char* argv[] )
 
 	
 
-	baseWidg->resize( 640, 640 );
+	baseWidg->resize( 900, 900 );
 	baseWidg->show();
 
 	DebugMenus::inject( baseWidg->layout() );

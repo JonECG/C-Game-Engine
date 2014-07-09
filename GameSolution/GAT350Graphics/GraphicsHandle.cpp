@@ -23,7 +23,13 @@ GeneralGlWindow::Renderable * character, *bushRend, *groundRend, *skyRend, *ques
 GeneralGlWindow::ShaderInfo *alphaPotShad;
 GeneralGlWindow::Renderable * pot;
 
-bool showFirstLab, showSecondLab;
+GeneralGlWindow::ShaderInfo *worldNormalMapShader;
+GeneralGlWindow::Renderable * worldPlane, *lightCube;
+glm::vec3 lightPos;
+float specAmount;
+float normalFade;
+
+bool showFirstLab, showSecondLab, showThirdLab;
 
 void GraphicsHandle::init()
 {
@@ -32,6 +38,11 @@ void GraphicsHandle::init()
 
 	showFirstLab = false;
 	showSecondLab = false;
+	showThirdLab = false;
+
+	specAmount = 100;
+	lightPos = glm::vec3(-1.0f,1.0f,3.0f);
+	normalFade = 0;
 
 	//DebugMenus::inject( layout() );
 	//DebugMenus::menu->show();
@@ -39,6 +50,7 @@ void GraphicsHandle::init()
 	textShad = addShaderInfo( "res/texture.vert", "res/texture.frag" );
 	questionShad = addShaderInfo( "res/texture.vert", "res/question.frag" );
 	alphaPotShad = addShaderInfo( "res/texture.vert", "res/teapotAlpha.frag" );
+	worldNormalMapShader = addShaderInfo( "res/texture.vert", "res/worldNormal.frag" );
 
 	GeneralGlWindow::TextureInfo * marioAndWeegee = addTexture( "res/marioAndLuigi.png" );
 	GeneralGlWindow::TextureInfo * marioAndWeegeeTrans = addTexture( "res/marioAndLuigiTrans.png" );
@@ -51,6 +63,8 @@ void GraphicsHandle::init()
 
 	GeneralGlWindow::TextureInfo * question = addTexture( "res/question.png" );
 	GeneralGlWindow::TextureInfo * noise = addTexture( "res/seamless.png" );
+
+	GeneralGlWindow::TextureInfo * worldNormalMapText = addTexture( "res/Shapes.png" );
 
 	Neumont::ShapeData charData = Neumont::ShapeGenerator::makePlane(2);
 	GeneralGlWindow::GeometryInfo * charGeo = addGeometry( charData.verts, charData.numVerts, charData.indices, charData.numIndices, GL_TRIANGLES );
@@ -73,6 +87,9 @@ void GraphicsHandle::init()
 	/*character->trans = flagByTexture;*/
 
 	pot = addRenderable( potGeo, glm::translate( glm::vec3( -2, -1, 2 ) )*glm::rotate( -90.0f, glm::vec3( 1,0,0 ) )*glm::scale( glm::vec3( 0.5f ) ), alphaPotShad, noise );
+
+	worldPlane = addRenderable( charGeo, glm::translate( glm::vec3( -0.1f, -1, 2 ) )*glm::rotate( 90.0f, glm::vec3( 1,0,0 ) )*glm::scale( glm::vec3( 2.0f ) ), worldNormalMapShader, worldNormalMapText, worldNormalMapText );
+	lightCube = addRenderable( cubeGeo, glm::mat4(), worldNormalMapShader, sky );
 
 	tightness = 40.0f;
 
@@ -112,8 +129,28 @@ void GraphicsHandle::init()
 
 	addUniformParameter( questionShad, "timey", PT_FLOAT, &timey);
 
+
+	addUniformParameter( worldNormalMapShader, "mvp", PT_MAT4, (float*)&camera.mvp );
+	
+	setUniformParameter( worldNormalMapShader, "amblight", PT_VEC4, (float*)&glm::vec4(0.1f,0.1f,0.1f,1) );
+	addUniformParameter( worldNormalMapShader, "diffpos", PT_VEC3, (float*)&lightPos );
+	addUniformParameter( worldNormalMapShader, "normalFade", PT_FLOAT, (float*)&normalFade );
+	setUniformParameter( worldNormalMapShader, "difflight", PT_VEC4, (float*)&glm::vec4(0.8f,0.8f,0.8f,1));
+	setUniformParameter( worldNormalMapShader, "colorInfluence", PT_VEC4, (float*)&glm::vec4(0.8f,0.8f,0.8f,1));
+	setUniformParameter( worldNormalMapShader, "specColor", PT_VEC4, (float*)&glm::vec4(0.8f,0.8f,0.8f,1));
+	addUniformParameter( worldNormalMapShader, "tightness", PT_FLOAT, (float*)&(specAmount) );
+	addUniformParameter( worldNormalMapShader, "eye", PT_VEC4, (float*)&camera.from);
+
 	DebugMenus::toggleBool( "Show Binary Alpha Lab", showFirstLab, "Binary Alpha" );
+
 	DebugMenus::toggleBool( "Show Alpha Lab", showSecondLab, "Alpha" );
+
+	DebugMenus::toggleBool( "Show World Normal Lab", showThirdLab, "World Normal" );
+	DebugMenus::slideVector( "Light Position", lightPos, -5, 5, "World Normal" );
+	DebugMenus::slideFloat( "Spec Amount", specAmount, 0, 1000, "World Normal" );
+	DebugMenus::slideFloat( "Normal Fade", normalFade, 0, 1, "World Normal" );
+
+
 }
 
 float angle = 0;
@@ -147,6 +184,14 @@ void GraphicsHandle::paint()
 		//glDisable(GL_POLYGON_STIPPLE);
 		glDisable(GL_CULL_FACE);
 		glDisable (GL_BLEND);
+	}
+
+	if( showThirdLab )
+	{
+		setUniformParameter( worldNormalMapShader, "diffpos", PT_VEC4, (float*)&glm::vec4(lightPos,1) );
+		lightCube->where = glm::translate( lightPos )*glm::scale( glm::vec3( 0.05 ) );
+		lightCube->draw();
+		worldPlane->draw();
 	}
 }
 
@@ -219,7 +264,7 @@ void GraphicsHandle::update( float dt )
 	/*if ( GetAsyncKeyState(VK_SHIFT) )
 		movement = glm::vec3( (GetAsyncKeyState('D')?1:0) - (GetAsyncKeyState('A')?1:0), 0, (GetAsyncKeyState('W')?1:0) - (GetAsyncKeyState('S')?1:0) );
 	else*/
-		movement = glm::vec3( (GetAsyncKeyState('D')?1:0) - (GetAsyncKeyState('A')?1:0), (GetAsyncKeyState(VK_SPACE)?1:0) - (GetAsyncKeyState(VK_SHIFT)?1:0),(GetAsyncKeyState('W')?1:0) - (GetAsyncKeyState('S')?1:0) );
+		movement = glm::vec3( (GetAsyncKeyState('D')?1:0) - (GetAsyncKeyState('A')?1:0), (GetAsyncKeyState('W')?1:0) - (GetAsyncKeyState('S')?1:0),(GetAsyncKeyState('R')?1:0) - (GetAsyncKeyState('F')?1:0) );
 
 	glm::vec3 worldMove = camSpace*movement * 1.0f * dt;
 

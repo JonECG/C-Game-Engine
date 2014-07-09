@@ -50,7 +50,7 @@ public:
 		currentTab = 0;
 		QVBoxLayout *mainLayout = new QVBoxLayout();
 		widg = new QTabWidget();
-		resize( 500, 200 );
+		resize( 500, 500 );
 
 		setLayout(mainLayout);
 		layout()->addWidget( widg );
