@@ -12,12 +12,16 @@ out vec4 vPosition;
 out vec4 vColor;
 out vec3 vNormal;
 out vec2 vUv;
+out vec3 vTangent;
+out float vHandedness;
 
 void main()
 {
 	gl_Position = mvp*world*in_position;
 	vNormal = normalize( mat3(world)*in_normal );
+	vTangent = normalize( mat3(world)*in_color.xyz );
 	vColor = in_color;
 	vUv = in_uv;
 	vPosition = world*in_position;
+	vHandedness = in_color.w;
 }

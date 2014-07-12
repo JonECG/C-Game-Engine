@@ -29,7 +29,138 @@ glm::vec3 lightPos;
 float specAmount;
 float normalFade;
 
-bool showFirstLab, showSecondLab, showThirdLab;
+GeneralGlWindow::ShaderInfo *tangentNormalMapShader;
+GeneralGlWindow::Renderable * datCubeTangent;
+glm::vec3 rotateTangentCube;
+
+bool showFirstLab, showSecondLab, showThirdLab, showFourthLab;
+
+Neumont::ShapeData makeCube()
+{
+	Neumont::ShapeData result = Neumont::ShapeGenerator::makeCube();
+
+	int i = 0;
+
+	//Normal: <0,1,0> -- Tangent: <1,0,0,-1>
+	result.verts[i++].color = glm::vec4( 1, 0, 0, -1 );
+	//Normal: <0,1,0> -- Tangent: <1,0,0,-1>
+	result.verts[i++].color = glm::vec4( 1, 0, 0, -1 );
+	//Normal: <0,1,0> -- Tangent: <1,0,0,-1>
+	result.verts[i++].color = glm::vec4( 1, 0, 0, -1 );
+	//Normal: <0,1,0> -- Tangent: <1,0,0,-1>
+	result.verts[i++].color = glm::vec4( 1, 0, 0, -1 );
+
+	//Normal: <0,0,-1> -- Tangent: <1,0,0,-1>
+	result.verts[i++].color = glm::vec4( 1, 0, 0, -1 );
+	//Normal: <0,0,-1> -- Tangent: <1,0,0,-1>
+	result.verts[i++].color = glm::vec4( 1, 0, 0, -1 );
+	//Normal: <0,0,-1> -- Tangent: <1,0,0,-1>
+	result.verts[i++].color = glm::vec4( 1, 0, 0, -1 );
+	//Normal: <0,0,-1> -- Tangent: <1,0,0,-1>
+	result.verts[i++].color = glm::vec4( 1, 0, 0, -1 );
+
+	//Normal: <1,0,0> -- Tangent: <0,0,1,-1>
+	result.verts[i++].color = glm::vec4( 0, 0, 1, -1 );
+	//Normal: <1,0,0> -- Tangent: <0,0,1,-1>
+	result.verts[i++].color = glm::vec4( 0, 0, 1, -1 );
+	//Normal: <1,0,0> -- Tangent: <0,0,1,-1>
+	result.verts[i++].color = glm::vec4( 0, 0, 1, -1 );
+	//Normal: <1,0,0> -- Tangent: <0,0,1,-1>
+	result.verts[i++].color = glm::vec4( 0, 0, 1, -1 );
+
+	//Normal: <-1,0,0> -- Tangent: <0,0,-1,-1>
+	result.verts[i++].color = glm::vec4( 0, 0, -1, -1 );
+	//Normal: <-1,0,0> -- Tangent: <0,0,-1,-1>
+	result.verts[i++].color = glm::vec4( 0, 0, -1, -1 );
+	//Normal: <-1,0,0> -- Tangent: <0,0,-1,-1>
+	result.verts[i++].color = glm::vec4( 0, 0, -1, -1 );
+	//Normal: <-1,0,0> -- Tangent: <0,0,-1,-1>
+	result.verts[i++].color = glm::vec4( 0, 0, -1, -1 );
+
+	//Normal: <0,0,1> -- Tangent: <-1,0,0,-1>
+	result.verts[i++].color = glm::vec4( -1, 0, 0, -1 );
+	//Normal: <0,0,1> -- Tangent: <-1,0,0,-1>
+	result.verts[i++].color = glm::vec4( -1, 0, 0, -1 );
+	//Normal: <0,0,1> -- Tangent: <-1,0,0,-1>
+	result.verts[i++].color = glm::vec4( -1, 0, 0, -1 );
+	//Normal: <0,0,1> -- Tangent: <-1,0,0,-1>
+	result.verts[i++].color = glm::vec4( -1, 0, 0, -1 );
+
+	//Normal: <0,-1,0> -- Tangent: <-1,0,0,1>
+	result.verts[i++].color = glm::vec4( -1, 0, 0, 1 );
+	//Normal: <0,-1,0> -- Tangent: <-1,0,0,1>
+	result.verts[i++].color = glm::vec4( -1, 0, 0, 1 );
+	//Normal: <0,-1,0> -- Tangent: <-1,0,0,1>
+	result.verts[i++].color = glm::vec4( -1, 0, 0, 1 );
+	//Normal: <0,-1,0> -- Tangent: <-1,0,0,1>
+	result.verts[i++].color = glm::vec4( -1, 0, 0, 1 );
+
+	return result;
+}
+
+//Ogre lab
+void calculateTangents(Neumont::ShapeData * shapeData)
+{
+	glm::vec3 *tan1 = new glm::vec3[shapeData->numVerts * 2];
+    glm::vec3 *tan2 = tan1 + shapeData->numVerts;
+    ZeroMemory(tan1, shapeData->numVerts * sizeof(glm::vec3) * 2);
+    
+	for (long a = 0; a < shapeData->numIndices/3; a++)
+    {
+		long i1 = shapeData->indices[a*3+0];
+        long i2 = shapeData->indices[a*3+1];
+        long i3 = shapeData->indices[a*3+2];
+        
+		const Neumont::Vertex& v1 = shapeData->verts[i1];
+        const Neumont::Vertex& v2 = shapeData->verts[i2];
+        const Neumont::Vertex& v3 = shapeData->verts[i3];
+        
+        /*const Point2D& w1 = texcoord[i1];
+        const Point2D& w2 = texcoord[i2];
+        const Point2D& w3 = texcoord[i3];*/
+        
+        float x1 = v2.position.x - v1.position.x;
+        float x2 = v3.position.x - v1.position.x;
+        float y1 = v2.position.y - v1.position.y;
+        float y2 = v3.position.y - v1.position.y;
+        float z1 = v2.position.z - v1.position.z;
+        float z2 = v3.position.z - v1.position.z;
+        
+		float s1 = v2.uv.x - v1.uv.x;
+        float s2 = v3.uv.x - v1.uv.x;
+        float t1 = v2.uv.y - v1.uv.y;
+        float t2 = v3.uv.y - v1.uv.y;
+        
+        float r = 1.0F / (s1 * t2 - s2 * t1);
+        glm::vec3 sdir((t2 * x1 - t1 * x2) * r, (t2 * y1 - t1 * y2) * r,
+                (t2 * z1 - t1 * z2) * r);
+        glm::vec3 tdir((s1 * x2 - s2 * x1) * r, (s1 * y2 - s2 * y1) * r,
+                (s1 * z2 - s2 * z1) * r);
+        
+        tan1[i1] += sdir;
+        tan1[i2] += sdir;
+        tan1[i3] += sdir;
+        
+        tan2[i1] += tdir;
+        tan2[i2] += tdir;
+        tan2[i3] += tdir;
+    }
+    
+    for (long a = 0; a < shapeData->numVerts; a++)
+    {
+		const glm::vec3& n = shapeData->verts[a].normal;
+        const glm::vec3& t = tan1[a];
+        
+        // Gram-Schmidt orthogonalize
+		shapeData->verts[a].color = glm::vec4( glm::normalize(t - n * glm::dot(n, t)), 0 );
+        
+        // Calculate handedness
+		shapeData->verts[a].color.w = (glm::dot(glm::cross(n, t), tan2[a]) < 0.0F) ? -1.0F : 1.0F;
+		//std::cout << shapeData->verts[a].normal.x << "; " << shapeData->verts[a].normal.y << "; " << shapeData->verts[a].normal.z << ";;; " << shapeData->verts[a].color.x << "; " << shapeData->verts[a].color.y << "; " << shapeData->verts[a].color.z << "; " << shapeData->verts[a].color.w << std::endl;
+    }
+    
+    delete[] tan1;
+}
 
 void GraphicsHandle::init()
 {
@@ -39,6 +170,7 @@ void GraphicsHandle::init()
 	showFirstLab = false;
 	showSecondLab = false;
 	showThirdLab = false;
+	showFourthLab = true;
 
 	specAmount = 100;
 	lightPos = glm::vec3(-1.0f,1.0f,3.0f);
@@ -51,6 +183,7 @@ void GraphicsHandle::init()
 	questionShad = addShaderInfo( "res/texture.vert", "res/question.frag" );
 	alphaPotShad = addShaderInfo( "res/texture.vert", "res/teapotAlpha.frag" );
 	worldNormalMapShader = addShaderInfo( "res/texture.vert", "res/worldNormal.frag" );
+	tangentNormalMapShader = addShaderInfo( "res/texture.vert", "res/tangentNormal.frag" );
 
 	GeneralGlWindow::TextureInfo * marioAndWeegee = addTexture( "res/marioAndLuigi.png" );
 	GeneralGlWindow::TextureInfo * marioAndWeegeeTrans = addTexture( "res/marioAndLuigiTrans.png" );
@@ -69,7 +202,7 @@ void GraphicsHandle::init()
 	Neumont::ShapeData charData = Neumont::ShapeGenerator::makePlane(2);
 	GeneralGlWindow::GeometryInfo * charGeo = addGeometry( charData.verts, charData.numVerts, charData.indices, charData.numIndices, GL_TRIANGLES );
 
-	Neumont::ShapeData cubeData = Neumont::ShapeGenerator::makeCube();
+	Neumont::ShapeData cubeData = makeCube();
 	GeneralGlWindow::GeometryInfo * cubeGeo = addGeometry( cubeData.verts, cubeData.numVerts, cubeData.indices, cubeData.numIndices, GL_TRIANGLES );
 
 	Neumont::ShapeData potData = Neumont::ShapeGenerator::makeTeapot(4,glm::mat4());
@@ -90,6 +223,9 @@ void GraphicsHandle::init()
 
 	worldPlane = addRenderable( charGeo, glm::translate( glm::vec3( -0.1f, -1, 2 ) )*glm::rotate( 90.0f, glm::vec3( 1,0,0 ) )*glm::scale( glm::vec3( 2.0f ) ), worldNormalMapShader, worldNormalMapText, worldNormalMapText );
 	lightCube = addRenderable( cubeGeo, glm::mat4(), worldNormalMapShader, sky );
+
+	datCubeTangent = addRenderable( cubeGeo, glm::mat4(), tangentNormalMapShader, worldNormalMapText, worldNormalMapText );
+	rotateTangentCube = glm::vec3();
 
 	tightness = 40.0f;
 
@@ -141,6 +277,17 @@ void GraphicsHandle::init()
 	addUniformParameter( worldNormalMapShader, "tightness", PT_FLOAT, (float*)&(specAmount) );
 	addUniformParameter( worldNormalMapShader, "eye", PT_VEC4, (float*)&camera.from);
 
+	addUniformParameter( tangentNormalMapShader, "mvp", PT_MAT4, (float*)&camera.mvp );
+	
+	setUniformParameter( tangentNormalMapShader, "amblight", PT_VEC4, (float*)&glm::vec4(0.1f,0.1f,0.1f,1) );
+	addUniformParameter( tangentNormalMapShader, "diffpos", PT_VEC3, (float*)&lightPos );
+	addUniformParameter( tangentNormalMapShader, "normalFade", PT_FLOAT, (float*)&normalFade );
+	setUniformParameter( tangentNormalMapShader, "difflight", PT_VEC4, (float*)&glm::vec4(0.8f,0.8f,0.8f,1));
+	setUniformParameter( tangentNormalMapShader, "colorInfluence", PT_VEC4, (float*)&glm::vec4(0.8f,0.8f,0.8f,1));
+	setUniformParameter( tangentNormalMapShader, "specColor", PT_VEC4, (float*)&glm::vec4(0.8f,0.8f,0.8f,1));
+	addUniformParameter( tangentNormalMapShader, "tightness", PT_FLOAT, (float*)&(specAmount) );
+	addUniformParameter( tangentNormalMapShader, "eye", PT_VEC4, (float*)&camera.from);
+
 	DebugMenus::toggleBool( "Show Binary Alpha Lab", showFirstLab, "Binary Alpha" );
 
 	DebugMenus::toggleBool( "Show Alpha Lab", showSecondLab, "Alpha" );
@@ -150,7 +297,11 @@ void GraphicsHandle::init()
 	DebugMenus::slideFloat( "Spec Amount", specAmount, 0, 1000, "World Normal" );
 	DebugMenus::slideFloat( "Normal Fade", normalFade, 0, 1, "World Normal" );
 
-
+	DebugMenus::toggleBool( "Show Tangent Normal Lab", showFourthLab, "Tangent Normal" );
+	DebugMenus::slideVector( "Light Position", lightPos, -5, 5, "Tangent Normal" );
+	DebugMenus::slideVector( "Cube Rotation", rotateTangentCube, 0, 360, "Tangent Normal" );
+	DebugMenus::slideFloat( "Spec Amount", specAmount, 0, 1000, "Tangent Normal" );
+	DebugMenus::slideFloat( "Normal Fade", normalFade, 0, 1, "Tangent Normal" );
 }
 
 float angle = 0;
@@ -192,6 +343,15 @@ void GraphicsHandle::paint()
 		lightCube->where = glm::translate( lightPos )*glm::scale( glm::vec3( 0.05 ) );
 		lightCube->draw();
 		worldPlane->draw();
+	}
+
+	if( showFourthLab )
+	{
+		setUniformParameter( tangentNormalMapShader, "diffpos", PT_VEC4, (float*)&glm::vec4(lightPos,1) );
+		lightCube->where = glm::translate( lightPos )*glm::scale( glm::vec3( 0.05 ) );
+		lightCube->draw();
+		datCubeTangent->where = glm::translate( glm::vec3(-1, 0, 2) ) * glm::scale( 0.25f, 0.25f, 0.25f ) * glm::rotate( rotateTangentCube.x, glm::vec3( 1, 0, 0 ) ) * glm::rotate( rotateTangentCube.y, glm::vec3( 0, 1, 0 ) ) * glm::rotate( rotateTangentCube.z, glm::vec3( 0, 0, 1 ) );
+		datCubeTangent->draw();
 	}
 }
 
