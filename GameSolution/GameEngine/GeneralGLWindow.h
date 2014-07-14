@@ -45,7 +45,7 @@ public:
 	class BufferInfo
 	{
 	public:
-		static const int SIZE = 1000000;
+		static const int SIZE = 10000000;
 		int freeptr;
 		GLuint id;
 
@@ -114,11 +114,12 @@ public:
 		bool visible;
 		TextureInfo* trans;
 		TextureInfo* texture;
+		TextureInfo* occlusion;
 		
 
 		inline Renderable();
 
-		inline Renderable( GeometryInfo* whatGeometry, glm::mat4 whereMatrix, ShaderInfo* howShader, TextureInfo* texture = nullptr, TextureInfo* trans = nullptr );
+		inline Renderable( GeometryInfo* whatGeometry, glm::mat4 whereMatrix, ShaderInfo* howShader, TextureInfo* texture = nullptr, TextureInfo* trans = nullptr, TextureInfo* occlusion = nullptr );
 
 		void ENGINE_SHARED draw();
 
@@ -136,11 +137,15 @@ public:
 	template<class TVert>
 	inline GeometryInfo* addGeometry( const TVert* verts, uint numVerts, ushort* indices, uint numIndices, GLuint indexingMode);
 
+	template<class TVert>
+	inline GeometryInfo* addGeometry( const TVert* verts, uint numVerts, uint* indices, uint numIndices, GLuint indexingMode);
+
 	GeometryInfo* addGeometry( const void* verts, uint numVertices, uint sizeVerts, ushort* indices, uint numIndices, GLuint indexingMode );
+	GeometryInfo* addGeometry( const void* verts, uint numVertices, uint sizeVerts, uint* indices, uint numIndices, GLuint indexingMode );
 	
 	ShaderInfo* addShaderInfo( const char* vertexShaderFile, const char* fragmentShaderFile);
 	
-	Renderable* addRenderable( GeometryInfo* whatGeometry, const glm::mat4& whereMatrix, ShaderInfo* howShaders, TextureInfo* texture = nullptr, TextureInfo* trans = nullptr);
+	Renderable* addRenderable( GeometryInfo* whatGeometry, const glm::mat4& whereMatrix, ShaderInfo* howShaders, TextureInfo* texture = nullptr, TextureInfo* trans = nullptr, TextureInfo* occlusion = nullptr);
 	Renderable* replaceRenderable( Renderable* oldRenderable, GeometryInfo* whatGeometry, const glm::mat4& whereMatrix, ShaderInfo* howShaders, TextureInfo* texture = nullptr);
 
 	GeometryInfo* loadFile( const char* path );

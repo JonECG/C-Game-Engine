@@ -15,6 +15,8 @@ glm::vec3 shipPos;
 float fps, delta;
 float timey;
 
+GeneralGlWindow::ShaderInfo *passShad;
+
 const char * stringy = "This is a string";
 
 GeneralGlWindow::ShaderInfo *questionShad;
@@ -33,7 +35,13 @@ GeneralGlWindow::ShaderInfo *tangentNormalMapShader;
 GeneralGlWindow::Renderable * datCubeTangent;
 glm::vec3 rotateTangentCube;
 
-bool showFirstLab, showSecondLab, showThirdLab, showFourthLab;
+GeneralGlWindow::ShaderInfo *ogreShader;
+GeneralGlWindow::Renderable * ogre;
+glm::vec3 rotateOgre;
+bool useDiffuse = true, useNormal = true, useAmbient = true;
+float useDiffuseF, useNormalF, useAmbientF;
+
+bool showFirstLab, showSecondLab, showThirdLab, showFourthLab, showFifthLab;
 
 Neumont::ShapeData makeCube()
 {
@@ -119,12 +127,12 @@ void calculateTangents(Neumont::ShapeData * shapeData)
         const Point2D& w2 = texcoord[i2];
         const Point2D& w3 = texcoord[i3];*/
         
-        float x1 = v2.position.x - v1.position.x;
-        float x2 = v3.position.x - v1.position.x;
-        float y1 = v2.position.y - v1.position.y;
-        float y2 = v3.position.y - v1.position.y;
-        float z1 = v2.position.z - v1.position.z;
-        float z2 = v3.position.z - v1.position.z;
+        float x1 = v2.normal.x - v1.normal.x;
+        float x2 = v3.normal.x - v1.normal.x;
+        float y1 = v2.normal.y - v1.normal.y;
+        float y2 = v3.normal.y - v1.normal.y;
+        float z1 = v2.normal.z - v1.normal.z;
+        float z2 = v3.normal.z - v1.normal.z;
         
 		float s1 = v2.uv.x - v1.uv.x;
         float s2 = v3.uv.x - v1.uv.x;
@@ -170,7 +178,8 @@ void GraphicsHandle::init()
 	showFirstLab = false;
 	showSecondLab = false;
 	showThirdLab = false;
-	showFourthLab = true;
+	showFourthLab = false;
+	showFifthLab = true;
 
 	specAmount = 100;
 	lightPos = glm::vec3(-1.0f,1.0f,3.0f);
@@ -179,11 +188,13 @@ void GraphicsHandle::init()
 	//DebugMenus::inject( layout() );
 	//DebugMenus::menu->show();
 
+	passShad = addShaderInfo( "res/passThrough.vert", "res/passThrough.frag" );
 	textShad = addShaderInfo( "res/texture.vert", "res/texture.frag" );
 	questionShad = addShaderInfo( "res/texture.vert", "res/question.frag" );
 	alphaPotShad = addShaderInfo( "res/texture.vert", "res/teapotAlpha.frag" );
 	worldNormalMapShader = addShaderInfo( "res/texture.vert", "res/worldNormal.frag" );
 	tangentNormalMapShader = addShaderInfo( "res/texture.vert", "res/tangentNormal.frag" );
+	ogreShader = addShaderInfo( "res/texture.vert", "res/ogre.frag" );
 
 	GeneralGlWindow::TextureInfo * marioAndWeegee = addTexture( "res/marioAndLuigi.png" );
 	GeneralGlWindow::TextureInfo * marioAndWeegeeTrans = addTexture( "res/marioAndLuigiTrans.png" );
@@ -199,6 +210,10 @@ void GraphicsHandle::init()
 
 	GeneralGlWindow::TextureInfo * worldNormalMapText = addTexture( "res/Shapes.png" );
 
+	GeneralGlWindow::TextureInfo * ogreColor = addTexture( "res/ogreColor.png" );
+	GeneralGlWindow::TextureInfo * ogreAmbientOcclusion = addTexture( "res/ogreAmbientOcclusion.png" );
+	GeneralGlWindow::TextureInfo * ogreNormal = addTexture( "res/ogreNormal.png" );
+
 	Neumont::ShapeData charData = Neumont::ShapeGenerator::makePlane(2);
 	GeneralGlWindow::GeometryInfo * charGeo = addGeometry( charData.verts, charData.numVerts, charData.indices, charData.numIndices, GL_TRIANGLES );
 
@@ -207,10 +222,13 @@ void GraphicsHandle::init()
 
 	Neumont::ShapeData potData = Neumont::ShapeGenerator::makeTeapot(4,glm::mat4());
 	GeneralGlWindow::GeometryInfo * potGeo = addGeometry( potData.verts, potData.numVerts, potData.indices, potData.numIndices, GL_TRIANGLES );
+
+	GeneralGlWindow::GeometryInfo * ogreGeo = loadFile( "res/bs_ears.mod" );
 	
 	setUpAttribs( charGeo );
 	setUpAttribs( cubeGeo );
 	setUpAttribs( potGeo );
+	setUpAttribs( ogreGeo );
 	character = addRenderable( charGeo, glm::translate( glm::vec3( -2, 0, 2 ) )*glm::rotate( 90.0f, glm::vec3( 1,0,0 ) ) * glm::scale( glm::vec3( 1, 1 , -1 ) ), textShad, marioAndWeegee, marioAndWeegeeTrans );
 	bushRend = addRenderable( charGeo, glm::translate( glm::vec3( -3, 0, 1 ) )*glm::rotate( 90.0f, glm::vec3( 1,0,0 ) ) * glm::scale( glm::vec3( 1, 1 , -1 ) ), textShad, bush, bushTrans );
 	groundRend = addRenderable( charGeo, glm::translate( glm::vec3( 0, -1, 4 ) )*glm::scale( glm::vec3( 4.0f ) ), textShad, ground );
@@ -227,11 +245,16 @@ void GraphicsHandle::init()
 	datCubeTangent = addRenderable( cubeGeo, glm::mat4(), tangentNormalMapShader, worldNormalMapText, worldNormalMapText );
 	rotateTangentCube = glm::vec3();
 
+	ogre = addRenderable( ogreGeo, glm::mat4(), ogreShader, ogreColor, ogreNormal, ogreAmbientOcclusion );
+	rotateOgre = glm::vec3();
+
 	tightness = 40.0f;
 
 	camera = Camera( float(width())/height(), 0.1, 100 );
 	camera.setFrom( glm::vec3( -1, 0.5f, 5 ) );
 	camera.setTo( glm::vec3(-2,0,0) );
+
+	addUniformParameter( passShad, "mvp", PT_MAT4, (float*)&camera.mvp );
 
 	addUniformParameter( textShad, "mvp", PT_MAT4, (float*)&camera.mvp );
 	
@@ -288,6 +311,22 @@ void GraphicsHandle::init()
 	addUniformParameter( tangentNormalMapShader, "tightness", PT_FLOAT, (float*)&(specAmount) );
 	addUniformParameter( tangentNormalMapShader, "eye", PT_VEC4, (float*)&camera.from);
 
+
+	addUniformParameter( ogreShader, "mvp", PT_MAT4, (float*)&camera.mvp );
+	
+	setUniformParameter( ogreShader, "amblight", PT_VEC4, (float*)&glm::vec4(0.1f,0.1f,0.1f,1) );
+	addUniformParameter( ogreShader, "diffpos", PT_VEC3, (float*)&lightPos );
+	addUniformParameter( ogreShader, "normalFade", PT_FLOAT, (float*)&normalFade );
+	setUniformParameter( ogreShader, "difflight", PT_VEC4, (float*)&glm::vec4(0.8f,0.8f,0.8f,1));
+	setUniformParameter( ogreShader, "colorInfluence", PT_VEC4, (float*)&glm::vec4(0.8f,0.8f,0.8f,1));
+	setUniformParameter( ogreShader, "specColor", PT_VEC4, (float*)&glm::vec4(0.8f,0.8f,0.8f,1));
+	addUniformParameter( ogreShader, "tightness", PT_FLOAT, (float*)&(specAmount) );
+	addUniformParameter( ogreShader, "eye", PT_VEC4, (float*)&camera.from);
+
+	addUniformParameter( ogreShader, "pleaseColor", PT_FLOAT, (float*)&(useDiffuseF) );
+	addUniformParameter( ogreShader, "pleaseNormal", PT_FLOAT, (float*)&(useNormalF) );
+	addUniformParameter( ogreShader, "pleaseAmbient", PT_FLOAT, (float*)&(useAmbientF) );
+
 	DebugMenus::toggleBool( "Show Binary Alpha Lab", showFirstLab, "Binary Alpha" );
 
 	DebugMenus::toggleBool( "Show Alpha Lab", showSecondLab, "Alpha" );
@@ -302,6 +341,13 @@ void GraphicsHandle::init()
 	DebugMenus::slideVector( "Cube Rotation", rotateTangentCube, 0, 360, "Tangent Normal" );
 	DebugMenus::slideFloat( "Spec Amount", specAmount, 0, 1000, "Tangent Normal" );
 	DebugMenus::slideFloat( "Normal Fade", normalFade, 0, 1, "Tangent Normal" );
+
+	DebugMenus::toggleBool( "Show Ogre Lab", showFifthLab, "RAGHR OGRE" );
+	DebugMenus::slideVector( "Light Position", lightPos, -5, 5, "RAGHR OGRE" );
+	DebugMenus::slideVector( "Ogre Rotation", rotateOgre, 0, 360, "RAGHR OGRE" );
+	DebugMenus::toggleBool( "Use Diffuse", useDiffuse, "RAGHR OGRE" );
+	DebugMenus::toggleBool( "Use Normal", useNormal, "RAGHR OGRE" );
+	DebugMenus::toggleBool( "Use AO", useAmbient, "RAGHR OGRE" );
 }
 
 float angle = 0;
@@ -352,6 +398,19 @@ void GraphicsHandle::paint()
 		lightCube->draw();
 		datCubeTangent->where = glm::translate( glm::vec3(-1, 0, 2) ) * glm::scale( 0.25f, 0.25f, 0.25f ) * glm::rotate( rotateTangentCube.x, glm::vec3( 1, 0, 0 ) ) * glm::rotate( rotateTangentCube.y, glm::vec3( 0, 1, 0 ) ) * glm::rotate( rotateTangentCube.z, glm::vec3( 0, 0, 1 ) );
 		datCubeTangent->draw();
+	}
+
+	if( showFifthLab )
+	{
+		setUniformParameter( ogreShader, "diffpos", PT_VEC4, (float*)&glm::vec4(lightPos,1) );
+		lightCube->where = glm::translate( lightPos )*glm::scale( glm::vec3( 0.05 ) );
+		lightCube->draw();
+		ogre->where = glm::translate( glm::vec3(-1, 0, 2) ) * glm::scale( glm::vec3( 1.0f ) ) * glm::rotate( rotateOgre.x, glm::vec3( 1, 0, 0 ) ) * glm::rotate( rotateOgre.y, glm::vec3( 0, 1, 0 ) ) * glm::rotate( rotateOgre.z, glm::vec3( 0, 0, 1 ) );
+		//ogre->where = glm::scale( glm::vec3( 3.0f ) );
+		ogre->draw();
+		useDiffuseF = (useDiffuse) ? 1 : 0;
+		useNormalF = (useNormal) ? 1 : 0;
+		useAmbientF = (useAmbient) ? 1 : 0;
 	}
 }
 

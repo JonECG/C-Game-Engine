@@ -12,6 +12,6 @@
     <VerifyUploadedFiles>false</VerifyUploadedFiles>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
-    <StartArguments>C:\Users\Jon\Documents\level.obj</StartArguments>
+    <StartArguments>C:\Users\Jon\Desktop\NewCPPWorkingRepo\GameSolution\GAT350Graphics\res\bs_ears.obj</StartArguments>
   </PropertyGroup>
 </Project>

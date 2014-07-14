@@ -74,7 +74,7 @@ GeneralGlWindow::Renderable::Renderable()
 	visible = true;
 }
 
-GeneralGlWindow::Renderable::Renderable( GeometryInfo* whatGeometry, glm::mat4 whereMatrix, ShaderInfo* howShader, TextureInfo* texture, TextureInfo* trans ) 
+GeneralGlWindow::Renderable::Renderable( GeometryInfo* whatGeometry, glm::mat4 whereMatrix, ShaderInfo* howShader, TextureInfo* texture, TextureInfo* trans, TextureInfo* occlusion ) 
 { 
 	numUniformParameters = 0;
 	this->whatGeometry = whatGeometry;
@@ -82,11 +82,19 @@ GeneralGlWindow::Renderable::Renderable( GeometryInfo* whatGeometry, glm::mat4 w
 	this->howShader = howShader;
 	this->texture = texture;
 	this->trans = trans;
+	this->occlusion = occlusion;
 	visible = true;
 }
 
 template<class TVert>
 GeneralGlWindow::GeometryInfo* GeneralGlWindow::addGeometry( const TVert* verts, uint numVerts, ushort* indices, uint numIndices, GLuint indexingMode)
+{
+	int vertsize = numVerts * sizeof( TVert );
+	return addGeometry( (void*)verts, numVerts, vertsize, indices, numIndices, indexingMode );
+}
+
+template<class TVert>
+GeneralGlWindow::GeometryInfo* GeneralGlWindow::addGeometry( const TVert* verts, uint numVerts, uint* indices, uint numIndices, GLuint indexingMode)
 {
 	int vertsize = numVerts * sizeof( TVert );
 	return addGeometry( (void*)verts, numVerts, vertsize, indices, numIndices, indexingMode );

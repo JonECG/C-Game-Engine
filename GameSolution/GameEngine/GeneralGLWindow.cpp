@@ -23,7 +23,7 @@ GeneralGlWindow::BufferInfo* GeneralGlWindow::nextFreeBuffer( int size )
 	{
 		if(!found)
 		{
-			if( buffers[i].SIZE - buffers[i].freeptr )
+			if( buffers[i].SIZE - buffers[i].freeptr > size )
 			{
 				result = &buffers[i];
 				found = true;
@@ -79,7 +79,68 @@ void GeneralGlWindow::setUpAttribs( GeometryInfo* geo )
 	addShaderStreamedParameter( geo, 3, GeneralGlWindow::ParameterType::PT_VEC2, geo->bufferOffset + geo->numIndices*sizeof(GLushort) + Neumont::Vertex::UV_OFFSET, Neumont::Vertex::STRIDE );
 }
 
-
+void calculateTangents(Neumont::Vertex * verts, int vertexCount, ushort* indices, int indexCount)
+{
+	glm::vec3 *tan1 = new glm::vec3[vertexCount * 2];
+    glm::vec3 *tan2 = tan1 + vertexCount;
+    ZeroMemory(tan1, vertexCount * sizeof(glm::vec3) * 2);
+    
+	for (long a = 0; a < indexCount/3; a++)
+    {
+		int i1 = indices[a*3+0];
+        int i2 = indices[a*3+1];
+        int i3 = indices[a*3+2];
+        
+		const Neumont::Vertex& v1 = verts[i1];
+        const Neumont::Vertex& v2 = verts[i2];
+        const Neumont::Vertex& v3 = verts[i3];
+        
+        /*const Point2D& w1 = texcoord[i1];
+        const Point2D& w2 = texcoord[i2];
+        const Point2D& w3 = texcoord[i3];*/
+        
+        float x1 = v2.normal.x - v1.normal.x;
+        float x2 = v3.normal.x - v1.normal.x;
+        float y1 = v2.normal.y - v1.normal.y;
+        float y2 = v3.normal.y - v1.normal.y;
+        float z1 = v2.normal.z - v1.normal.z;
+        float z2 = v3.normal.z - v1.normal.z;
+        
+		float s1 = v2.uv.x - v1.uv.x;
+        float s2 = v3.uv.x - v1.uv.x;
+        float t1 = v2.uv.y - v1.uv.y;
+        float t2 = v3.uv.y - v1.uv.y;
+        
+        float r = 1.0F / (s1 * t2 - s2 * t1);
+        glm::vec3 sdir((t2 * x1 - t1 * x2) * r, (t2 * y1 - t1 * y2) * r,
+                (t2 * z1 - t1 * z2) * r);
+        glm::vec3 tdir((s1 * x2 - s2 * x1) * r, (s1 * y2 - s2 * y1) * r,
+                (s1 * z2 - s2 * z1) * r);
+        
+        tan1[i1] += sdir;
+        tan1[i2] += sdir;
+        tan1[i3] += sdir;
+        
+        tan2[i1] += tdir;
+        tan2[i2] += tdir;
+        tan2[i3] += tdir;
+    }
+    
+    for (long a = 0; a < vertexCount; a++)
+    {
+		const glm::vec3& n = verts[a].normal;
+        const glm::vec3& t = tan1[a];
+        
+        // Gram-Schmidt orthogonalize
+		verts[a].color = glm::vec4( glm::normalize(t - n * glm::dot(n, t)), 0 );
+        
+        // Calculate handedness
+		verts[a].color.w = (glm::dot(glm::cross(n, t), tan2[a]) < 0.0F) ? -1.0F : 1.0F;
+		//std::cout << shapeData->verts[a].normal.x << "; " << shapeData->verts[a].normal.y << "; " << shapeData->verts[a].normal.z << ";;; " << shapeData->verts[a].color.x << "; " << shapeData->verts[a].color.y << "; " << shapeData->verts[a].color.z << "; " << shapeData->verts[a].color.w << std::endl;
+    }
+    
+    delete[] tan1;
+}
 
 GeneralGlWindow::GeometryInfo* GeneralGlWindow::loadFile( const char* path )
 {
@@ -97,13 +158,31 @@ GeneralGlWindow::GeometryInfo* GeneralGlWindow::loadFile( const char* path )
 
 	int vertsSize = (vertexCount) * sizeof(Neumont::Vertex);
 	int indexSize = indexCount * sizeof(ushort);
+	//int indexSize = indexCount * sizeof(uint);
 
 	char* data = new char[ vertsSize + indexSize ];
 
 	file.read( data, vertsSize + indexSize );
 
 	ushort* indices = reinterpret_cast<ushort*>(data);
+	//uint* indices = reinterpret_cast<uint*>(data);
 	Neumont::Vertex* verts = reinterpret_cast<Neumont::Vertex*>(data+indexSize);
+
+	for( int i = 0; i < 3; i++ )
+	{
+		std::cout << "Normal: " << verts[i].normal.x << ", " << verts[i].normal.y << ", " << verts[i].normal.z<<std::endl << "  Tangent: " << verts[i].color.x << ", " << verts[i].color.y << ", " << verts[i].color.z << ", " << verts[i].color.w  <<std::endl<<std::endl;
+	}
+	calculateTangents( verts, vertexCount, indices, indexCount );
+	std::cout << "change" << std::endl;
+	for( int i = 0; i < 3; i++ )
+	{
+		std::cout << "Normal: " << verts[i].normal.x << ", " << verts[i].normal.y << ", " << verts[i].normal.z<<std::endl << "  Tangent: " << verts[i].color.x << ", " << verts[i].color.y << ", " << verts[i].color.z << ", " << verts[i].color.w  <<std::endl<<std::endl;
+	}
+
+	for( int i = 0; i < indexCount / 3; i++ )
+	{
+		//std::cout << indices[i*3] << ", " << indices[i*3+1] << ", " << indices[i*3+2] << std::endl;
+	}
 	
 	file.close();
 
@@ -130,7 +209,7 @@ GeneralGlWindow::GeometryInfo* GeneralGlWindow::addGeometry( const void* verts, 
 
 		
 
-	std::cout << "Geometry " << GeneralGlWindow::currentGeometryIndex << " assigned to buffer " << (freeBuffer->id) << " at position " << (freeBuffer->freeptr) << ". Vert: " << sizeVerts << " Ind: " << indexsize << std::endl;
+	std::cout << "Geometry " << GeneralGlWindow::currentGeometryIndex << " assigned to buffer " << (freeBuffer->id) << " at position " << (freeBuffer->freeptr) << ". Vert: "<< sizeVerts << " in " << numVertices<< " Ind: " << indexsize << " in " << numIndices << std::endl;
 
 	geometryInfos[ GeneralGlWindow::currentGeometryIndex ] = GeometryInfo( arr, freeBuffer->id, numIndices, numVertices, indexingMode, freeBuffer->freeptr );
 	GeneralGlWindow::currentGeometryIndex++;
@@ -139,6 +218,7 @@ GeneralGlWindow::GeometryInfo* GeneralGlWindow::addGeometry( const void* verts, 
 
 	return &geometryInfos[ GeneralGlWindow::currentGeometryIndex-1 ];
 }
+
 
 std::string readFile(const char *filePath) 
 {
@@ -256,11 +336,11 @@ GeneralGlWindow::ShaderInfo* GeneralGlWindow::addShaderInfo( const char* vertexS
 	return &shaderInfos[ currentShaderIndex-1 ];
 }
 
-GeneralGlWindow::Renderable* GeneralGlWindow::addRenderable( GeometryInfo* whatGeometry, const glm::mat4& whereMatrix, ShaderInfo* howShaders, TextureInfo* texture, TextureInfo* trans )
+GeneralGlWindow::Renderable* GeneralGlWindow::addRenderable( GeometryInfo* whatGeometry, const glm::mat4& whereMatrix, ShaderInfo* howShaders, TextureInfo* texture, TextureInfo* trans, TextureInfo* occlusion )
 {
 	static int currentRenderableIndex = 0;
 
-	renderables[ currentRenderableIndex ] = Renderable( whatGeometry, whereMatrix, howShaders, texture, trans );
+	renderables[ currentRenderableIndex ] = Renderable( whatGeometry, whereMatrix, howShaders, texture, trans, occlusion );
 	currentRenderableIndex++;
 
 	return &renderables[ currentRenderableIndex-1 ];
@@ -452,6 +532,28 @@ void GeneralGlWindow::Renderable::draw()
 			if (loc != -1)
 				glUniform1i(loc, 0);
 		}
+
+		//AmbientOcclusion
+		loc = glGetUniformLocation( howShader->shaderProgramID, "useAmbientOcclusion");
+
+		if( occlusion != NULL )
+		{
+			if (loc != -1)
+				glUniform1i(loc, 1);
+
+			glActiveTexture( GL_TEXTURE2 );
+
+			glBindTexture( GL_TEXTURE_2D, occlusion->textureID );
+
+			loc = glGetUniformLocation( howShader->shaderProgramID, "amo");
+			glUniform1i(loc, 2);
+		}
+		else
+		{
+			if (loc != -1)
+				glUniform1i(loc, 0);
+		}
+
 
 		loc = glGetUniformLocation( howShader->shaderProgramID, "useLighting");
 		if( loc != -1 )
