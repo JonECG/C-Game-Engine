@@ -72,6 +72,8 @@ public:
 		inline Neumont::Vertex* getVertices();
 	} geometryInfos[100];
 
+	struct ShaderInfo;
+
 	struct TextureInfo
 	{
 		unsigned int textureID;
@@ -83,24 +85,32 @@ public:
 	struct UniformInfo
 	{
 		int location;
+		const char * name;
 
 		const float* data;
 
 		ParameterType type;
 
 		inline UniformInfo(){};
-		inline UniformInfo( int locationIn, const float* dataIn, ParameterType typeIn );
+		inline UniformInfo( int locationIn, const char * name, const float* dataIn, ParameterType typeIn );
+		inline UniformInfo( const char * name, const float* dataIn, ParameterType typeIn );
 
-		void ENGINE_SHARED send();
+		void ENGINE_SHARED send( GeneralGlWindow::ShaderInfo * shader );
 
 	} uniformInfos[100];
 
 	struct ShaderInfo
 	{
-		unsigned int shaderProgramID;
+		unsigned int shaderProgramID, vertId, fragId;
+
+		const char *vertexPath, *fragmentPath;
+		long timeStamp;
 
 		inline ShaderInfo();
 		inline ShaderInfo( unsigned int program );
+
+		static GLuint numGlobalUniformParameters;
+		static UniformInfo * globalUniformParameters;
 
 		GLuint numUniformParameters;
 		UniformInfo uniformParameters[20];
@@ -152,13 +162,19 @@ public:
 
 	void addShaderStreamedParameter( GeometryInfo* geoID, uint layoutLocation,  GeneralGlWindow::ParameterType parameterType, uint bufferOffset, uint bufferStride);
 	
+	void addUniformParameter( const char* name, GeneralGlWindow::ParameterType parameterType, const float* value);
 	void addUniformParameter( ShaderInfo* shader, const char* name, GeneralGlWindow::ParameterType parameterType, const float* value);
 	void addUniformParameter( Renderable* renderable, const char* name, GeneralGlWindow::ParameterType parameterType, const float* value);
 
+	void setUniformParameter( const char* name, GeneralGlWindow::ParameterType parameterType, const float* value);
 	void setUniformParameter( ShaderInfo* shader, const char* name, GeneralGlWindow::ParameterType parameterType, const float* value);
 	void setUniformParameter( Renderable* renderable, const char* name, GeneralGlWindow::ParameterType parameterType, const float* value);
 
 	TextureInfo* addTexture(const char* fileName);
+	TextureInfo* addTexture(QImage * image);
+
+	void updateTexture(TextureInfo* texture, const char* fileName);
+	void updateTexture(TextureInfo* texture, QImage * image);
 
 private:
 	BufferInfo* nextFreeBuffer( int size );

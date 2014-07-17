@@ -7,7 +7,9 @@
 #include "ShapeGenerator.h"
 
 #include "DebugMenus.h"
+#include <Qt\qapplication.h>
 
+#include "noise\noise.h"
 
 Camera camera;
 float tightness;
@@ -41,7 +43,12 @@ glm::vec3 rotateOgre;
 bool useDiffuse = true, useNormal = true, useAmbient = true;
 float useDiffuseF, useNormalF, useAmbientF;
 
-bool showFirstLab, showSecondLab, showThirdLab, showFourthLab, showFifthLab;
+GeneralGlWindow::TextureInfo *perlinMap;
+GeneralGlWindow::Renderable * perlinShow;
+GeneralGlWindow::ShaderInfo *perlinShad;
+float perlinOctaves = 3, perlinFrequency = 4, perlinPersistence = 0.5, perlinSeed = 22, perlinLacunarity = 2.5, perlinZ = 0;
+
+bool showFirstLab, showSecondLab, showThirdLab, showFourthLab, showFifthLab, showSixthLab;
 
 Neumont::ShapeData makeCube()
 {
@@ -170,6 +177,8 @@ void calculateTangents(Neumont::ShapeData * shapeData)
     delete[] tan1;
 }
 
+glm::vec4 difLight = glm::vec4(1.0f,1.0f,1.0f,1), colInfluence = glm::vec4(0.8f,0.8f,0.8f,1), specColor = glm::vec4(0.8f,0.8f,0.8f,1);
+
 void GraphicsHandle::init()
 {
 	glEnable( GL_TEXTURE_2D );
@@ -179,7 +188,8 @@ void GraphicsHandle::init()
 	showSecondLab = false;
 	showThirdLab = false;
 	showFourthLab = false;
-	showFifthLab = true;
+	showFifthLab = false;
+	showSixthLab = true;
 
 	specAmount = 100;
 	lightPos = glm::vec3(-1.0f,1.0f,3.0f);
@@ -195,6 +205,7 @@ void GraphicsHandle::init()
 	worldNormalMapShader = addShaderInfo( "res/texture.vert", "res/worldNormal.frag" );
 	tangentNormalMapShader = addShaderInfo( "res/texture.vert", "res/tangentNormal.frag" );
 	ogreShader = addShaderInfo( "res/texture.vert", "res/ogre.frag" );
+	perlinShad = addShaderInfo( "res/texture.vert", "res/perlin.frag" );
 
 	GeneralGlWindow::TextureInfo * marioAndWeegee = addTexture( "res/marioAndLuigi.png" );
 	GeneralGlWindow::TextureInfo * marioAndWeegeeTrans = addTexture( "res/marioAndLuigiTrans.png" );
@@ -213,6 +224,8 @@ void GraphicsHandle::init()
 	GeneralGlWindow::TextureInfo * ogreColor = addTexture( "res/ogreColor.png" );
 	GeneralGlWindow::TextureInfo * ogreAmbientOcclusion = addTexture( "res/ogreAmbientOcclusion.png" );
 	GeneralGlWindow::TextureInfo * ogreNormal = addTexture( "res/ogreNormal.png" );
+
+
 
 	Neumont::ShapeData charData = Neumont::ShapeGenerator::makePlane(2);
 	GeneralGlWindow::GeometryInfo * charGeo = addGeometry( charData.verts, charData.numVerts, charData.indices, charData.numIndices, GL_TRIANGLES );
@@ -248,80 +261,32 @@ void GraphicsHandle::init()
 	ogre = addRenderable( ogreGeo, glm::mat4(), ogreShader, ogreColor, ogreNormal, ogreAmbientOcclusion );
 	rotateOgre = glm::vec3();
 
+
+	QImage perlin( 512, 512, QImage::Format::Format_ARGB32 );
+	perlinMap = addTexture( &perlin );
+	perlinShow = addRenderable( cubeGeo, glm::mat4(), perlinShad, perlinMap );
+
+
 	tightness = 40.0f;
 
 	camera = Camera( float(width())/height(), 0.1, 100 );
 	camera.setFrom( glm::vec3( -1, 0.5f, 5 ) );
 	camera.setTo( glm::vec3(-2,0,0) );
 
-	addUniformParameter( passShad, "mvp", PT_MAT4, (float*)&camera.mvp );
+	addUniformParameter( "mvp", PT_MAT4, (float*)&camera.mvp );
+	setUniformParameter( "amblight", PT_VEC4, (float*)&glm::vec4(0.1f,0.1f,0.1f,1) );//set
+	addUniformParameter( "diffpos", PT_VEC3, (float*)&lightPos );
+	addUniformParameter( "normalFade", PT_FLOAT, (float*)&normalFade );
+	addUniformParameter( "difflight", PT_VEC4, (float*)&difLight);//set
+	addUniformParameter( "colorInfluence", PT_VEC4, (float*)&colInfluence);//set
+	addUniformParameter( "specColor", PT_VEC4, (float*)&specColor);//set
+	addUniformParameter( "tightness", PT_FLOAT, (float*)&(specAmount) );
+	addUniformParameter( "eye", PT_VEC4, (float*)&camera.from);
+	addUniformParameter( "timey", PT_FLOAT, &timey);
 
-	addUniformParameter( textShad, "mvp", PT_MAT4, (float*)&camera.mvp );
+
 	
-	setUniformParameter( textShad, "amblight", PT_VEC4, (float*)&glm::vec4(0.1f,0.1f,0.1f,1) );
-	setUniformParameter( textShad, "diffpos", PT_VEC4, (float*)&glm::vec4(3.0f,6.0f,8.0f,1) );
-	setUniformParameter( textShad, "difflight", PT_VEC4, (float*)&glm::vec4(0.8f,0.8f,0.8f,1));
-	setUniformParameter( textShad, "specColor", PT_VEC4, (float*)&glm::vec4(0.8f,0.8f,0.8f,1));
-	addUniformParameter( textShad, "tightness", PT_FLOAT, (float*)&(tightness) );
-	addUniformParameter( textShad, "eye", PT_VEC4, (float*)&camera.from);
 
-	addUniformParameter( alphaPotShad, "mvp", PT_MAT4, (float*)&camera.mvp );
-	
-	setUniformParameter( alphaPotShad, "amblight", PT_VEC4, (float*)&glm::vec4(0.1f,0.1f,0.1f,1) );
-	setUniformParameter( alphaPotShad, "diffpos", PT_VEC4, (float*)&glm::vec4(3.0f,6.0f,8.0f,1) );
-	setUniformParameter( alphaPotShad, "difflight", PT_VEC4, (float*)&glm::vec4(0.8f,0.8f,0.8f,1));
-	setUniformParameter( alphaPotShad, "specColor", PT_VEC4, (float*)&glm::vec4(0.8f,0.8f,0.8f,1));
-	setUniformParameter( alphaPotShad, "colorInfluence", PT_VEC4, (float*)&glm::vec4(1,1,1,1));
-	addUniformParameter( alphaPotShad, "tightness", PT_FLOAT, (float*)&(tightness) );
-	addUniformParameter( alphaPotShad, "eye", PT_VEC4, (float*)&camera.from);
-
-
-	addUniformParameter( questionShad, "mvp", PT_MAT4, (float*)&camera.mvp );
-	
-	setUniformParameter( questionShad, "amblight", PT_VEC4, (float*)&glm::vec4(0.1f,0.1f,0.1f,1) );
-	setUniformParameter( questionShad, "diffpos", PT_VEC4, (float*)&glm::vec4(3.0f,6.0f,8.0f,1) );
-	setUniformParameter( questionShad, "difflight", PT_VEC4, (float*)&glm::vec4(0.8f,0.8f,0.8f,1));
-	setUniformParameter( questionShad, "specColor", PT_VEC4, (float*)&glm::vec4(0.8f,0.8f,0.8f,1));
-	addUniformParameter( questionShad, "tightness", PT_FLOAT, (float*)&(tightness) );
-	addUniformParameter( questionShad, "eye", PT_VEC4, (float*)&camera.from);
-
-
-	addUniformParameter( questionShad, "timey", PT_FLOAT, &timey);
-
-
-	addUniformParameter( worldNormalMapShader, "mvp", PT_MAT4, (float*)&camera.mvp );
-	
-	setUniformParameter( worldNormalMapShader, "amblight", PT_VEC4, (float*)&glm::vec4(0.1f,0.1f,0.1f,1) );
-	addUniformParameter( worldNormalMapShader, "diffpos", PT_VEC3, (float*)&lightPos );
-	addUniformParameter( worldNormalMapShader, "normalFade", PT_FLOAT, (float*)&normalFade );
-	setUniformParameter( worldNormalMapShader, "difflight", PT_VEC4, (float*)&glm::vec4(0.8f,0.8f,0.8f,1));
-	setUniformParameter( worldNormalMapShader, "colorInfluence", PT_VEC4, (float*)&glm::vec4(0.8f,0.8f,0.8f,1));
-	setUniformParameter( worldNormalMapShader, "specColor", PT_VEC4, (float*)&glm::vec4(0.8f,0.8f,0.8f,1));
-	addUniformParameter( worldNormalMapShader, "tightness", PT_FLOAT, (float*)&(specAmount) );
-	addUniformParameter( worldNormalMapShader, "eye", PT_VEC4, (float*)&camera.from);
-
-	addUniformParameter( tangentNormalMapShader, "mvp", PT_MAT4, (float*)&camera.mvp );
-	
-	setUniformParameter( tangentNormalMapShader, "amblight", PT_VEC4, (float*)&glm::vec4(0.1f,0.1f,0.1f,1) );
-	addUniformParameter( tangentNormalMapShader, "diffpos", PT_VEC3, (float*)&lightPos );
-	addUniformParameter( tangentNormalMapShader, "normalFade", PT_FLOAT, (float*)&normalFade );
-	setUniformParameter( tangentNormalMapShader, "difflight", PT_VEC4, (float*)&glm::vec4(0.8f,0.8f,0.8f,1));
-	setUniformParameter( tangentNormalMapShader, "colorInfluence", PT_VEC4, (float*)&glm::vec4(0.8f,0.8f,0.8f,1));
-	setUniformParameter( tangentNormalMapShader, "specColor", PT_VEC4, (float*)&glm::vec4(0.8f,0.8f,0.8f,1));
-	addUniformParameter( tangentNormalMapShader, "tightness", PT_FLOAT, (float*)&(specAmount) );
-	addUniformParameter( tangentNormalMapShader, "eye", PT_VEC4, (float*)&camera.from);
-
-
-	addUniformParameter( ogreShader, "mvp", PT_MAT4, (float*)&camera.mvp );
-	
-	setUniformParameter( ogreShader, "amblight", PT_VEC4, (float*)&glm::vec4(0.1f,0.1f,0.1f,1) );
-	addUniformParameter( ogreShader, "diffpos", PT_VEC3, (float*)&lightPos );
-	addUniformParameter( ogreShader, "normalFade", PT_FLOAT, (float*)&normalFade );
-	setUniformParameter( ogreShader, "difflight", PT_VEC4, (float*)&glm::vec4(0.8f,0.8f,0.8f,1));
-	setUniformParameter( ogreShader, "colorInfluence", PT_VEC4, (float*)&glm::vec4(0.8f,0.8f,0.8f,1));
-	setUniformParameter( ogreShader, "specColor", PT_VEC4, (float*)&glm::vec4(0.8f,0.8f,0.8f,1));
-	addUniformParameter( ogreShader, "tightness", PT_FLOAT, (float*)&(specAmount) );
-	addUniformParameter( ogreShader, "eye", PT_VEC4, (float*)&camera.from);
 
 	addUniformParameter( ogreShader, "pleaseColor", PT_FLOAT, (float*)&(useDiffuseF) );
 	addUniformParameter( ogreShader, "pleaseNormal", PT_FLOAT, (float*)&(useNormalF) );
@@ -348,6 +313,14 @@ void GraphicsHandle::init()
 	DebugMenus::toggleBool( "Use Diffuse", useDiffuse, "RAGHR OGRE" );
 	DebugMenus::toggleBool( "Use Normal", useNormal, "RAGHR OGRE" );
 	DebugMenus::toggleBool( "Use AO", useAmbient, "RAGHR OGRE" );
+
+	DebugMenus::toggleBool( "Show Perlin Lab", showSixthLab, "Perlin" );
+	DebugMenus::slideFloat( "Seed", perlinSeed, 0, 100, "Perlin" );
+	DebugMenus::slideFloat( "Octaves", perlinOctaves, 1, 11, "Perlin" );
+	DebugMenus::slideFloat( "Frequency", perlinFrequency, 0, 10, "Perlin" );
+	DebugMenus::slideFloat( "Persistence", perlinPersistence, 0, 2, "Perlin" );
+	DebugMenus::slideFloat( "Lacunarity", perlinLacunarity, 0, 10, "Perlin" );
+	DebugMenus::slideFloat( "Sampled Z", perlinZ, 0, 1, "Perlin" );
 }
 
 float angle = 0;
@@ -359,6 +332,7 @@ void GraphicsHandle::paint()
 	glClearColor( 0.5, 0.1, 0.1, 0 );
 	glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 
+	setUniformParameter( "diffpos", PT_VEC4, (float*)&glm::vec4(lightPos,1) );
 
 	if( showFirstLab )
 	{
@@ -411,6 +385,47 @@ void GraphicsHandle::paint()
 		useDiffuseF = (useDiffuse) ? 1 : 0;
 		useNormalF = (useNormal) ? 1 : 0;
 		useAmbientF = (useAmbient) ? 1 : 0;
+	}
+
+	if( showSixthLab )
+	{
+		static float prevFreq, prevLac, prevSeed, prevZ, prevPers;
+		static int prevOct;
+
+		if( prevFreq != perlinFrequency || prevLac != perlinLacunarity || prevSeed != perlinSeed || prevZ != perlinZ || prevOct != (int)perlinOctaves || prevPers != perlinPersistence )
+		{
+			noise::module::Perlin perlinModule;
+			perlinModule.SetFrequency( perlinFrequency );
+			perlinModule.SetPersistence( perlinPersistence );
+			perlinModule.SetOctaveCount( (int) perlinOctaves );
+			perlinModule.SetLacunarity( perlinLacunarity );
+			perlinModule.SetSeed( perlinSeed );
+
+			QImage perlin( 512, 512, QImage::Format::Format_ARGB32 );
+			for( int x = 0; x < perlin.width(); x++ )
+			{
+				for( int y = 0; y < perlin.height(); y++ )
+				{
+					double value = ( perlinModule.GetValue( x/512.0f, y/512.0f, perlinZ ) + 1 ) / 2;
+					value = (value > 1) ? 1 : value;
+					value = (value < 0) ? 0 : value;
+					int amount = (int) (255 * value );
+					perlin.setPixel( x, y, qRgb( amount, amount, amount ) );
+				}
+			}
+			updateTexture( perlinMap, &perlin );
+
+			prevFreq = perlinFrequency;
+			prevLac = perlinLacunarity;
+			prevSeed = perlinSeed;
+			prevZ = perlinZ;
+			prevOct = (int)perlinOctaves;
+			prevPers = perlinPersistence;
+		}
+
+		perlinShow->where = glm::translate( glm::vec3(-1, 0, 0) );
+
+		perlinShow->draw();
 	}
 }
 
@@ -466,29 +481,34 @@ void GraphicsHandle::mouseMoveEvent( QMouseEvent * mEvent )
 
 void GraphicsHandle::update( float dt )
 {
-	static glm::vec2 mousePosition = glm::vec2();
-
 	timey += dt;
 
 	fps = 1/dt;
 	delta = dt;
+	if( QApplication::activeWindow() != 0 )
+	{
+		static glm::vec2 mousePosition = glm::vec2();
 
-	glm::vec3 camNorm = glm::normalize( camera.getTo()-camera.getFrom() );
-	glm::vec3 strafe = glm::normalize( -glm::cross( glm::vec3(0,1,0), camNorm ) );
-	glm::vec3 up = glm::normalize( glm::cross( strafe, camNorm ) );
+		
 
-	glm::mat3 camSpace = glm::mat3( strafe, camNorm, up );
+		glm::vec3 camNorm = glm::normalize( camera.getTo()-camera.getFrom() );
+		glm::vec3 strafe = glm::normalize( -glm::cross( glm::vec3(0,1,0), camNorm ) );
+		glm::vec3 up = glm::normalize( glm::cross( strafe, camNorm ) );
 
-	glm::vec3 movement;
-	/*if ( GetAsyncKeyState(VK_SHIFT) )
-		movement = glm::vec3( (GetAsyncKeyState('D')?1:0) - (GetAsyncKeyState('A')?1:0), 0, (GetAsyncKeyState('W')?1:0) - (GetAsyncKeyState('S')?1:0) );
-	else*/
-		movement = glm::vec3( (GetAsyncKeyState('D')?1:0) - (GetAsyncKeyState('A')?1:0), (GetAsyncKeyState('W')?1:0) - (GetAsyncKeyState('S')?1:0),(GetAsyncKeyState('R')?1:0) - (GetAsyncKeyState('F')?1:0) );
+		glm::mat3 camSpace = glm::mat3( strafe, camNorm, up );
 
-	glm::vec3 worldMove = camSpace*movement * 1.0f * dt;
+		glm::vec3 movement;
+		/*if ( GetAsyncKeyState(VK_SHIFT) )
+			movement = glm::vec3( (GetAsyncKeyState('D')?1:0) - (GetAsyncKeyState('A')?1:0), 0, (GetAsyncKeyState('W')?1:0) - (GetAsyncKeyState('S')?1:0) );
+		else*/
+			movement = glm::vec3( (GetAsyncKeyState('D')?1:0) - (GetAsyncKeyState('A')?1:0), (GetAsyncKeyState('W')?1:0) - (GetAsyncKeyState('S')?1:0),(GetAsyncKeyState('R')?1:0) - (GetAsyncKeyState('F')?1:0) );
 
-	camera.setTo( camera.getTo() + worldMove);
-	camera.setFrom( camera.getFrom() + worldMove);
+		glm::vec3 worldMove = camSpace*movement * 1.0f * dt;
+
+		camera.setTo( camera.getTo() + worldMove);
+		camera.setFrom( camera.getFrom() + worldMove);
+	}
+	
 
 	camera.calcModelViewProjection();
 

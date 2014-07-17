@@ -50,9 +50,18 @@ GeneralGlWindow::TextureInfo::TextureInfo( unsigned int texture )
 	textureID = texture;
 }
 
-GeneralGlWindow::UniformInfo::UniformInfo( int locationIn, const float* dataIn, ParameterType typeIn )
+GeneralGlWindow::UniformInfo::UniformInfo( int locationIn, const char * name, const float* dataIn, ParameterType typeIn )
 {
 	location = locationIn;
+	this->name = name;
+	data = dataIn;
+	type = typeIn;
+}
+
+GeneralGlWindow::UniformInfo::UniformInfo( const char * name, const float* dataIn, ParameterType typeIn )
+{
+	location = -1;
+	this->name = name;
 	data = dataIn;
 	type = typeIn;
 }
@@ -60,6 +69,7 @@ GeneralGlWindow::UniformInfo::UniformInfo( int locationIn, const float* dataIn, 
 GeneralGlWindow::ShaderInfo::ShaderInfo()
 {
 	numUniformParameters = 0;
+	shaderProgramID = -1;
 }
 
 GeneralGlWindow::ShaderInfo::ShaderInfo( unsigned int program )

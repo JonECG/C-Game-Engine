@@ -65,8 +65,6 @@ void main()
 	
 	if( useLighting != 0 )
 	{
-		
-		
 		vec3 eyeVector = normalize( vec3( eye-vPosition ) );
 		vec3 lightVector = normalize( vec3( diffpos - vPosition ) );
 		

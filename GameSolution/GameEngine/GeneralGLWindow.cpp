@@ -7,6 +7,9 @@
 #include <ShapeGenerator.h>
 #include "DebugMenus.h"
 
+#include <sys/types.h>
+#include <sys/stat.h> 
+
 #include "GeneralGLWindow.h"
 #include <Qt/qtimer.h>
 
@@ -243,14 +246,27 @@ std::string readFile(const char *filePath)
 	return content;
 }
 
-GeneralGlWindow::ShaderInfo* GeneralGlWindow::addShaderInfo( const char* vertexShaderFile, const char* fragmentShaderFile)
+void loadShaderData( GeneralGlWindow::ShaderInfo * shader )
 {
 	GLuint vertShader = glCreateShader(GL_VERTEX_SHADER);
 	GLuint fragShader = glCreateShader(GL_FRAGMENT_SHADER);
 
+	std::string vertShaderStr = readFile(shader->vertexPath);
+	std::string fragShaderStr = readFile(shader->fragmentPath);
 
-	std::string vertShaderStr = readFile(vertexShaderFile);
-	std::string fragShaderStr = readFile(fragmentShaderFile);
+	struct stat st;
+	long lastUpdated;
+
+    stat(shader->vertexPath, &st);
+	lastUpdated = st.st_mtime;
+	stat(shader->fragmentPath, &st);
+	if( lastUpdated < st.st_mtime )
+	{
+		lastUpdated = st.st_mtime;
+	}
+
+	shader->timeStamp = lastUpdated;
+
 	const char *vertShaderSrc = vertShaderStr.c_str();
 	const char *fragShaderSrc = fragShaderStr.c_str();
 
@@ -304,10 +320,25 @@ GeneralGlWindow::ShaderInfo* GeneralGlWindow::addShaderInfo( const char* vertexS
 	std::cout << std::endl;
 
 	std::cout << "Linking program" << std::endl;
-	GLuint program = glCreateProgram();
+	GLuint program;
+	if( shader->shaderProgramID == -1 )
+	{
+		program = glCreateProgram();
+	}
+	else
+	{
+		program = shader->shaderProgramID;
+		glDetachShader(program, shader->vertId );
+		glDetachShader(program, shader->fragId );
+	}
+	
 	glAttachShader(program, vertShader);
 	glAttachShader(program, fragShader);
+	
 	glLinkProgram(program);
+
+	shader->vertId = vertShader;
+	shader->fragId = fragShader;
 
 	glGetProgramiv(program, GL_LINK_STATUS, &successful);
 	if( successful )
@@ -325,12 +356,22 @@ GeneralGlWindow::ShaderInfo* GeneralGlWindow::addShaderInfo( const char* vertexS
 		delete programError;
 	}
 
+	shader->shaderProgramID = program;
+
 	glDeleteShader(vertShader);
 	glDeleteShader(fragShader);
+}
 
-	static int currentShaderIndex = 0;
+int currentShaderIndex = 0;
 
-	shaderInfos[ currentShaderIndex ] = ShaderInfo( program );
+GeneralGlWindow::ShaderInfo* GeneralGlWindow::addShaderInfo( const char* vertexShaderFile, const char* fragmentShaderFile)
+{
+	shaderInfos[ currentShaderIndex ] = ShaderInfo();
+	shaderInfos[ currentShaderIndex ].vertexPath = vertexShaderFile;
+	shaderInfos[ currentShaderIndex ].fragmentPath = fragmentShaderFile;
+
+	loadShaderData( &shaderInfos[ currentShaderIndex ] );
+
 	currentShaderIndex++;
 
 	return &shaderInfos[ currentShaderIndex-1 ];
@@ -368,6 +409,13 @@ void GeneralGlWindow::addShaderStreamedParameter( GeometryInfo* geoID, uint layo
 	
 int currentUniformIndex = 0;
 
+GeneralGlWindow::UniformInfo * GeneralGlWindow::ShaderInfo::globalUniformParameters = new GeneralGlWindow::UniformInfo[10];
+GLuint GeneralGlWindow::ShaderInfo::numGlobalUniformParameters = 0;
+
+void GeneralGlWindow::addUniformParameter( const char* name, GeneralGlWindow::ParameterType parameterType, const float* value)
+{
+	GeneralGlWindow::ShaderInfo::globalUniformParameters[ GeneralGlWindow::ShaderInfo::numGlobalUniformParameters++ ] = UniformInfo( name, value, parameterType );
+}
 
 void GeneralGlWindow::addUniformParameter( ShaderInfo* shader, const char* name, GeneralGlWindow::ParameterType parameterType, const float* value)
 {
@@ -386,7 +434,7 @@ void GeneralGlWindow::addUniformParameter( ShaderInfo* shader, const char* name,
 		}
 		else
 		{
-			shader->uniformParameters[shader->numUniformParameters] = UniformInfo( loc, value, parameterType );
+			shader->uniformParameters[shader->numUniformParameters] = UniformInfo( loc, name, value, parameterType );
 			shader->numUniformParameters++;
 		}
 	}
@@ -409,19 +457,27 @@ void GeneralGlWindow::addUniformParameter( Renderable* renderable, const char* n
 		}
 		else
 		{
-			renderable->uniformParameters[renderable->numUniformParameters] = UniformInfo( loc, value, parameterType );
+			renderable->uniformParameters[renderable->numUniformParameters] = UniformInfo( loc, name, value, parameterType );
 			renderable->numUniformParameters++;
 		}
 	}
 }
 
 
+void GeneralGlWindow::setUniformParameter( const char* name, GeneralGlWindow::ParameterType parameterType, const float* value)
+{
+	for( int i = 0; i < currentShaderIndex; i++ )
+	{
+		setUniformParameter( &shaderInfos[i], name, parameterType, value );
+	}
+}
+
 void GeneralGlWindow::setUniformParameter( ShaderInfo* shader, const char* name, GeneralGlWindow::ParameterType parameterType, const float* value)
 {
 	glUseProgram( shader->shaderProgramID );
 	GLint loc = glGetUniformLocation(shader->shaderProgramID, name);
-	UniformInfo inf = UniformInfo( loc, value, parameterType );
-	inf.send();
+	UniformInfo inf = UniformInfo( loc, name, value, parameterType );
+	inf.send(shader);
 }
 
 void GeneralGlWindow::setUniformParameter( Renderable* renderable, const char* name, GeneralGlWindow::ParameterType parameterType, const float* value)
@@ -433,50 +489,77 @@ GeneralGlWindow::TextureInfo* GeneralGlWindow::addTexture(const char* fileName)
 {
 	static QImage image;
 	image.load( fileName );
+	return addTexture( &image );
+}
 
-	image = convertToGLFormat( image );
-
+GeneralGlWindow::TextureInfo* GeneralGlWindow::addTexture(QImage * inputImage)
+{
 	unsigned int texture;
 	glGenTextures( 1, &texture );
-	glBindTexture( GL_TEXTURE_2D, texture );
-	glTexImage2D(GL_TEXTURE_2D, 0, 3, image.width(), image.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, image.bits());
 	
-	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
-	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
 
 	static int currentTextureIndex = 0;
 
 	textureInfos[ currentTextureIndex ] = TextureInfo( texture );
 	currentTextureIndex++;
 
+	updateTexture( &textureInfos[ currentTextureIndex-1 ], inputImage );
+
 	return &textureInfos[ currentTextureIndex-1 ];
 }
 
-void GeneralGlWindow::UniformInfo::send()
+void GeneralGlWindow::updateTexture(TextureInfo* texture, const char* fileName)
 {
-	if (location != -1)
+	static QImage image;
+	image.load( fileName );
+	return updateTexture( texture, &image );
+}
+
+void GeneralGlWindow::updateTexture(TextureInfo* texture, QImage * inputImage)
+{
+	QImage image = convertToGLFormat( *inputImage );
+
+	glBindTexture( GL_TEXTURE_2D, texture->textureID );
+	glTexImage2D(GL_TEXTURE_2D, 0, 3, image.width(), image.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, image.bits());
+	
+	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
+	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+}
+
+void GeneralGlWindow::UniformInfo::send( GeneralGlWindow::ShaderInfo * shader )
+{
+	int loc = location;
+	if( location == -1 )
+	{
+		loc = glGetUniformLocation( shader->shaderProgramID, name);
+		if( loc != -1 )
+		{
+			//std::cout << "Found Global: " << shader->fragmentPath << " uni " << name << std::endl;
+		}
+	}
+	if (loc != -1)
 	{
 		switch( type )
 		{
 		case GeneralGlWindow::ParameterType::PT_FLOAT:
-			glUniform1f( location, *data );
+			glUniform1f( loc, *data );
 			break;
 
 		case GeneralGlWindow::ParameterType::PT_VEC2:
-			glUniform2fv( location, 1, data );
+			glUniform2fv( loc, 1, data );
 			break;
 		case GeneralGlWindow::ParameterType::PT_VEC3:
-			glUniform3fv( location, 1, data );
+			glUniform3fv( loc, 1, data );
 			break;
 		case GeneralGlWindow::ParameterType::PT_VEC4:
-			glUniform4fv( location, 1, data );
+			glUniform4fv( loc, 1, data );
 			break;
 
 		case GeneralGlWindow::ParameterType::PT_MAT3:
-			glUniformMatrix3fv( location, 1, false, data );
+			glUniformMatrix3fv( loc, 1, false, data );
 			break;
 		case GeneralGlWindow::ParameterType::PT_MAT4:
-			glUniformMatrix4fv( location, 1, false, data );
+			glUniformMatrix4fv( loc, 1, false, data );
 			break;
 		}
 	}
@@ -486,6 +569,23 @@ void GeneralGlWindow::Renderable::draw()
 {
 	if (visible)
 	{
+		struct stat st;
+		long lastUpdated;
+
+		stat(howShader->vertexPath, &st);
+		lastUpdated = st.st_mtime;
+		stat(howShader->fragmentPath, &st);
+		if( lastUpdated < st.st_mtime )
+		{
+			lastUpdated = st.st_mtime;
+		}
+
+		if( lastUpdated > howShader->timeStamp )
+		{
+			Sleep( 20 );
+			loadShaderData( howShader );
+		}
+
 		glUseProgram( howShader->shaderProgramID );
 
 		GLint loc;
@@ -571,15 +671,19 @@ void GeneralGlWindow::Renderable::draw()
 		loc = glGetUniformLocation( howShader->shaderProgramID, "world");
 		glUniformMatrix4fv(loc, 1, false, (float*)&where );
 
+		for( int i = 0; i < GeneralGlWindow::ShaderInfo::numGlobalUniformParameters; i++ )
+		{
+			GeneralGlWindow::ShaderInfo::globalUniformParameters[i].send(howShader);
+		}
 
 		for( int i = 0; i < howShader->numUniformParameters; i++ )
 		{
-			howShader->uniformParameters[i].send();
+			howShader->uniformParameters[i].send(howShader);
 		}
 
 		for( int i = 0; i < numUniformParameters; i++ )
 		{
-			uniformParameters[i].send();
+			uniformParameters[i].send(howShader);
 		}
 				
 		glBindVertexArray( whatGeometry->vertexArrayID );
