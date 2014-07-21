@@ -44,9 +44,9 @@ bool useDiffuse = true, useNormal = true, useAmbient = true;
 float useDiffuseF, useNormalF, useAmbientF;
 
 GeneralGlWindow::TextureInfo *perlinMap;
-GeneralGlWindow::Renderable * perlinShow;
-GeneralGlWindow::ShaderInfo *perlinShad;
-float perlinOctaves = 3, perlinFrequency = 4, perlinPersistence = 0.5, perlinSeed = 22, perlinLacunarity = 2.5, perlinZ = 0;
+GeneralGlWindow::Renderable * perlinShow, *starrySky;
+GeneralGlWindow::ShaderInfo *perlinShad, *starShad;
+float perlinOctaves = 11, perlinFrequency = 10, perlinPersistence = 0.5, perlinSeed = 22, perlinLacunarity = 3.0, perlinZ = 0;
 
 bool showFirstLab, showSecondLab, showThirdLab, showFourthLab, showFifthLab, showSixthLab;
 
@@ -205,7 +205,8 @@ void GraphicsHandle::init()
 	worldNormalMapShader = addShaderInfo( "res/texture.vert", "res/worldNormal.frag" );
 	tangentNormalMapShader = addShaderInfo( "res/texture.vert", "res/tangentNormal.frag" );
 	ogreShader = addShaderInfo( "res/texture.vert", "res/ogre.frag" );
-	perlinShad = addShaderInfo( "res/texture.vert", "res/perlin.frag" );
+	perlinShad = addShaderInfo( "res/perlin.vert", "res/perlin.frag" );
+	starShad = addShaderInfo( "res/texture.vert", "res/stars.frag" );
 
 	GeneralGlWindow::TextureInfo * marioAndWeegee = addTexture( "res/marioAndLuigi.png" );
 	GeneralGlWindow::TextureInfo * marioAndWeegeeTrans = addTexture( "res/marioAndLuigiTrans.png" );
@@ -236,12 +237,21 @@ void GraphicsHandle::init()
 	Neumont::ShapeData potData = Neumont::ShapeGenerator::makeTeapot(4,glm::mat4());
 	GeneralGlWindow::GeometryInfo * potGeo = addGeometry( potData.verts, potData.numVerts, potData.indices, potData.numIndices, GL_TRIANGLES );
 
+	Neumont::ShapeData sphereData = Neumont::ShapeGenerator::makeSphere( 200 );
+	for( int i = 0; i < sphereData.numVerts; i++ )
+	{
+		Neumont::Vertex * vert = &sphereData.verts[i];
+		vert->uv = glm::vec2( ( std::atan2( vert->position.y, vert->position.x ) ) / 6.28 + 0.5, 0.5 - std::asin( vert->position.z ) / 3.14 );
+	}
+	GeneralGlWindow::GeometryInfo * sphereGeo = addGeometry( sphereData.verts, sphereData.numVerts, sphereData.indices, sphereData.numIndices, GL_TRIANGLES );
+
 	GeneralGlWindow::GeometryInfo * ogreGeo = loadFile( "res/bs_ears.mod" );
 	
 	setUpAttribs( charGeo );
 	setUpAttribs( cubeGeo );
 	setUpAttribs( potGeo );
 	setUpAttribs( ogreGeo );
+	setUpAttribs( sphereGeo );
 	character = addRenderable( charGeo, glm::translate( glm::vec3( -2, 0, 2 ) )*glm::rotate( 90.0f, glm::vec3( 1,0,0 ) ) * glm::scale( glm::vec3( 1, 1 , -1 ) ), textShad, marioAndWeegee, marioAndWeegeeTrans );
 	bushRend = addRenderable( charGeo, glm::translate( glm::vec3( -3, 0, 1 ) )*glm::rotate( 90.0f, glm::vec3( 1,0,0 ) ) * glm::scale( glm::vec3( 1, 1 , -1 ) ), textShad, bush, bushTrans );
 	groundRend = addRenderable( charGeo, glm::translate( glm::vec3( 0, -1, 4 ) )*glm::scale( glm::vec3( 4.0f ) ), textShad, ground );
@@ -264,7 +274,8 @@ void GraphicsHandle::init()
 
 	QImage perlin( 512, 512, QImage::Format::Format_ARGB32 );
 	perlinMap = addTexture( &perlin );
-	perlinShow = addRenderable( cubeGeo, glm::mat4(), perlinShad, perlinMap );
+	perlinShow = addRenderable( sphereGeo, glm::rotate( glm::mat4(), 90.0f, glm::vec3( 1,0, 0 ) ), perlinShad, perlinMap );
+	starrySky = addRenderable( sphereGeo, glm::mat4(), starShad, perlinMap );
 
 
 	tightness = 40.0f;
@@ -406,7 +417,7 @@ void GraphicsHandle::paint()
 			{
 				for( int y = 0; y < perlin.height(); y++ )
 				{
-					double value = ( perlinModule.GetValue( x/512.0f, y/512.0f, perlinZ ) + 1 ) / 2;
+					double value = ( perlinModule.GetValue( x/512.0f, y/512.0f, perlinZ/10 ) + 1 ) / 2;
 					value = (value > 1) ? 1 : value;
 					value = (value < 0) ? 0 : value;
 					int amount = (int) (255 * value );
@@ -423,7 +434,9 @@ void GraphicsHandle::paint()
 			prevPers = perlinPersistence;
 		}
 
-		perlinShow->where = glm::translate( glm::vec3(-1, 0, 0) );
+		perlinShow->where = glm::translate( glm::vec3(-1, 0, 0) ) * glm::rotate( glm::mat4(), 90.0f, glm::vec3( 1,0, 0 ) ) * glm::rotate( glm::mat4(), 90.0f, glm::vec3( 0, 0, 1 ) );
+		starrySky->where = glm::translate( camera.from ) * glm::scale( -glm::vec3( 10 ) ) * glm::rotate( glm::mat4(), 90.0f, glm::vec3( 1,0, 0 ) ) * glm::rotate( glm::mat4(), 90.0f, glm::vec3( 0, 0, 1 ) );
+		starrySky->draw();
 
 		perlinShow->draw();
 	}

@@ -4,6 +4,8 @@
 #include "LevelEditorWindow.h"
 #include "DebugMenus.h"
 
+#include "GL\glew.h"
+
 int main( int argc, char* argv[] )
 {
 	QApplication app( argc, argv );
