@@ -406,7 +406,7 @@ void GraphicsHandle::paint()
 	{
 		static float prevFreq, prevLac, prevSeed, prevZ, prevPers;
 		static int prevOct;
-		int dimensions = 1024;
+		int dimensions = 256;
 
 		if( prevFreq != perlinFrequency || prevLac != perlinLacunarity || prevSeed != perlinSeed || prevZ != perlinZ || prevOct != (int)perlinOctaves || prevPers != perlinPersistence )
 		{
