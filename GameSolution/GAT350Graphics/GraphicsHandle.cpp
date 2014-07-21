@@ -47,6 +47,9 @@ GeneralGlWindow::TextureInfo *perlinMap;
 GeneralGlWindow::Renderable * perlinShow, *starrySky;
 GeneralGlWindow::ShaderInfo *perlinShad, *starShad;
 float perlinOctaves = 11, perlinFrequency = 10, perlinPersistence = 0.5, perlinSeed = 22, perlinLacunarity = 3.0, perlinZ = 0;
+//glm::vec3 standingPosition = glm::vec3( 10, 0, 0 );
+bool goOnSurface = false;
+QImage * img = new QImage();
 
 bool showFirstLab, showSecondLab, showThirdLab, showFourthLab, showFifthLab, showSixthLab;
 
@@ -234,10 +237,10 @@ void GraphicsHandle::init()
 	Neumont::ShapeData cubeData = makeCube();
 	GeneralGlWindow::GeometryInfo * cubeGeo = addGeometry( cubeData.verts, cubeData.numVerts, cubeData.indices, cubeData.numIndices, GL_TRIANGLES );
 
-	Neumont::ShapeData potData = Neumont::ShapeGenerator::makeTeapot(4,glm::mat4());
+	Neumont::ShapeData potData = Neumont::ShapeGenerator::makeTeapot(8,glm::mat4());
 	GeneralGlWindow::GeometryInfo * potGeo = addGeometry( potData.verts, potData.numVerts, potData.indices, potData.numIndices, GL_TRIANGLES );
 
-	Neumont::ShapeData sphereData = Neumont::ShapeGenerator::makeSphere( 200 );
+	Neumont::ShapeData sphereData = Neumont::ShapeGenerator::makeSphere( 250 );
 	for( int i = 0; i < sphereData.numVerts; i++ )
 	{
 		Neumont::Vertex * vert = &sphereData.verts[i];
@@ -280,7 +283,7 @@ void GraphicsHandle::init()
 
 	tightness = 40.0f;
 
-	camera = Camera( float(width())/height(), 0.1, 100 );
+	camera = Camera( float(width())/height(), 0.01, 20 );
 	camera.setFrom( glm::vec3( -1, 0.5f, 5 ) );
 	camera.setTo( glm::vec3(-2,0,0) );
 
@@ -332,6 +335,7 @@ void GraphicsHandle::init()
 	DebugMenus::slideFloat( "Persistence", perlinPersistence, 0, 2, "Perlin" );
 	DebugMenus::slideFloat( "Lacunarity", perlinLacunarity, 0, 10, "Perlin" );
 	DebugMenus::slideFloat( "Sampled Z", perlinZ, 0, 1, "Perlin" );
+	DebugMenus::toggleBool( "Planet Walk", goOnSurface, "Perlin" );
 }
 
 float angle = 0;
@@ -402,6 +406,7 @@ void GraphicsHandle::paint()
 	{
 		static float prevFreq, prevLac, prevSeed, prevZ, prevPers;
 		static int prevOct;
+		int dimensions = 1024;
 
 		if( prevFreq != perlinFrequency || prevLac != perlinLacunarity || prevSeed != perlinSeed || prevZ != perlinZ || prevOct != (int)perlinOctaves || prevPers != perlinPersistence )
 		{
@@ -412,19 +417,20 @@ void GraphicsHandle::paint()
 			perlinModule.SetLacunarity( perlinLacunarity );
 			perlinModule.SetSeed( perlinSeed );
 
-			QImage perlin( 512, 512, QImage::Format::Format_ARGB32 );
-			for( int x = 0; x < perlin.width(); x++ )
+			
+			*img = QImage( dimensions, dimensions, QImage::Format::Format_ARGB32 );
+			for( int x = 0; x < img->width(); x++ )
 			{
-				for( int y = 0; y < perlin.height(); y++ )
+				for( int y = 0; y < img->height(); y++ )
 				{
-					double value = ( perlinModule.GetValue( x/512.0f, y/512.0f, perlinZ/10 ) + 1 ) / 2;
+					double value = ( perlinModule.GetValue( x/(float)(dimensions), y/(float)(dimensions), perlinZ/10 ) + 1 ) / 2;
 					value = (value > 1) ? 1 : value;
 					value = (value < 0) ? 0 : value;
 					int amount = (int) (255 * value );
-					perlin.setPixel( x, y, qRgb( amount, amount, amount ) );
+					img->setPixel( x, y, qRgb( amount, amount, amount ) );
 				}
 			}
-			updateTexture( perlinMap, &perlin );
+			updateTexture( perlinMap, img );
 
 			prevFreq = perlinFrequency;
 			prevLac = perlinLacunarity;
@@ -433,6 +439,46 @@ void GraphicsHandle::paint()
 			prevOct = (int)perlinOctaves;
 			prevPers = perlinPersistence;
 		}
+
+		glm::vec3 worldPosition = glm::vec3( -1, 0, 0 );
+
+		if( goOnSurface )
+		{
+			/*noise::module::Perlin perlinModule;
+			perlinModule.SetFrequency( perlinFrequency );
+			perlinModule.SetPersistence( perlinPersistence );
+			perlinModule.SetOctaveCount( (int) perlinOctaves );
+			perlinModule.SetLacunarity( perlinLacunarity );
+			perlinModule.SetSeed( perlinSeed );*/
+
+			camera.from = glm::normalize( camera.from - worldPosition );
+			//glm::vec2 uvShould = glm::vec2( ( std::atan2( camera.from.y, camera.from.x ) ) / 6.28 + 0.5, 0.5 - std::asin( camera.from.z ) / 3.14 );
+
+			//float value = ( perlinModule.GetValue( uvShould.x, uvShould.y, perlinZ/10 ) + 1 ) / 2;
+			//		value = (value > 1) ? 1 : value;
+			//		value = (value < 0) ? 0 : value;
+			//		//int amount = (int) (255 * value );
+
+			////float value = qRed( img->pixel( (int)(img->width()*uvShould.x), (int)(img->height()*uvShould.y) ) ) / 255.0f;
+
+
+			//float dist = 2 * std::max( 0.0f, std::min( 0.5f, 0.6f-glm::length( uvShould - glm::vec2( 0.5f, 0.5f ) ) ) );
+			//float xMult = 2, yMult = 3;
+			//float cutOff = 0.35 + sin(timey+uvShould.x*xMult+uvShould.y*yMult)*0.02;
+			camera.from = camera.from * ( 1.05f );//+ std::pow( std::max( cutOff, value*dist) , 2.0f )/10.0f );
+
+			
+			//camera.from = camera.from * 1.05f + worldPosition;
+			camera.from += worldPosition;
+			camera.up = glm::normalize( camera.from - worldPosition );
+			//camera.from = standingPosition;
+		}
+		else
+		{
+			camera.up = glm::vec3( 0, 1, 0 );
+		}
+
+		camera.calcModelViewProjection();
 
 		perlinShow->where = glm::translate( glm::vec3(-1, 0, 0) ) * glm::rotate( glm::mat4(), 90.0f, glm::vec3( 1,0, 0 ) ) * glm::rotate( glm::mat4(), 90.0f, glm::vec3( 0, 0, 1 ) );
 		starrySky->where = glm::translate( camera.from ) * glm::scale( -glm::vec3( 10 ) ) * glm::rotate( glm::mat4(), 90.0f, glm::vec3( 1,0, 0 ) ) * glm::rotate( glm::mat4(), 90.0f, glm::vec3( 0, 0, 1 ) );
@@ -479,7 +525,7 @@ void GraphicsHandle::mouseMoveEvent( QMouseEvent * mEvent )
 
 		glm::vec3 camNorm = glm::normalize( camera.getTo()-camera.getFrom() );
 
-		glm::vec3 rotUp = glm::cross( glm::vec3(0,1,0), camNorm );
+		glm::vec3 rotUp = glm::cross( camera.up, camNorm );
 		glm::vec3 rotRight = glm::cross( rotUp, camNorm );
 
 
@@ -505,7 +551,7 @@ void GraphicsHandle::update( float dt )
 		
 
 		glm::vec3 camNorm = glm::normalize( camera.getTo()-camera.getFrom() );
-		glm::vec3 strafe = glm::normalize( -glm::cross( glm::vec3(0,1,0), camNorm ) );
+		glm::vec3 strafe = glm::normalize( -glm::cross( camera.up, camNorm ) );
 		glm::vec3 up = glm::normalize( glm::cross( strafe, camNorm ) );
 
 		glm::mat3 camSpace = glm::mat3( strafe, camNorm, up );
@@ -516,7 +562,7 @@ void GraphicsHandle::update( float dt )
 		else*/
 			movement = glm::vec3( (GetAsyncKeyState('D')?1:0) - (GetAsyncKeyState('A')?1:0), (GetAsyncKeyState('W')?1:0) - (GetAsyncKeyState('S')?1:0),(GetAsyncKeyState('R')?1:0) - (GetAsyncKeyState('F')?1:0) );
 
-		glm::vec3 worldMove = camSpace*movement * 1.0f * dt;
+			glm::vec3 worldMove = camSpace*movement * dt * ( (goOnSurface)? 0.1f : 1.0f );
 
 		camera.setTo( camera.getTo() + worldMove);
 		camera.setFrom( camera.getFrom() + worldMove);

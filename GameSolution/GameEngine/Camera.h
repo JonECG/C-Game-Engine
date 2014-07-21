@@ -11,9 +11,11 @@ class Camera
 	GLfloat aspect, camNear, camFar;
 public:
 	glm::vec3 from, to;
+	glm::vec3 up;
 	glm::mat4 proj, view, mvp;
 	inline Camera()
 	{
+		up = glm::vec3( 0, 1, 0 );
 		aspect = 1.0f;
 		camNear = 0.1f;
 		camFar = 200.0f;
@@ -21,6 +23,7 @@ public:
 
 	inline Camera( GLfloat aspect, GLfloat camNear, GLfloat camFar)
 	{
+		up = glm::vec3( 0, 1, 0 );
 		this -> aspect = aspect;
 		this -> camNear = camNear;
 		this -> camFar = camFar;
@@ -29,7 +32,7 @@ public:
 	inline void move( glm::vec3 move )
 	{
 		glm::vec3 localZ = glm::normalize( to - from );
-		glm::vec3 localX = glm::cross( localZ, glm::vec3( 0, 1, 0 ) );
+		glm::vec3 localX = glm::cross( localZ, up );
 		glm::vec3 localY = glm::cross( localX, localZ );
 
 		glm::mat3 localTransform = glm::mat3( localX, localY, localZ );
@@ -67,7 +70,7 @@ public:
 
 	inline glm::mat4 calcModelView()
 	{
-		view = glm::lookAt( from, to, glm::vec3( 0.0, 1.0, 0.0 ) );
+		view = glm::lookAt( from, to, up );
 		return view;
 	}
 

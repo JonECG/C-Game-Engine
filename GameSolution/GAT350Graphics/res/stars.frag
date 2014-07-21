@@ -34,7 +34,7 @@ void main()
 		
 		color = vec4(0,0,0,0);
 		
-		float factor = 16;
+		float factor = 20;
 		//Nebulae
 		color.x = max( 0, (2* grabbedColor.x - 1)/ factor );
 		color.z = max( 0, (2* -grabbedColor.x + 1)/ factor );
@@ -49,8 +49,8 @@ void main()
 		float starAmount = 100 * max( max( 0, 0.01 - abs( mod( usingUv.x, divisor ) - divisor/2 ) )
 		, max( 0, 0.01 - abs( mod( usingUv.y, divisor ) - divisor/2 ) ) );
 		divisor = 0.0001;
-		starAmount *= pow( 2 * abs( divisor/2 - mod( usingUv.x*usingUv.y + sin(grabbedColor.x), divisor ) ) / divisor, 5 );
-		starAmount *= pow( 2 * abs( divisor/2 - mod( usingUv.y + cos(grabbedColor.x), divisor ) ) / divisor, 5 );
+		starAmount *= pow( 2 * abs( divisor/2 - mod( usingUv.x*usingUv.y + sin(grabbedColor.x), divisor ) ) / divisor, 8 + 6*sin(timey + usingUv.x * 30) );
+		starAmount *= pow( 2 * abs( divisor/2 - mod( usingUv.y + cos(grabbedColor.x), divisor ) ) / divisor, 8 + 6*sin(timey*.15 + usingUv.y * 80) );
 		//starAmount *= pow( mod( vUv.y, 0.1 ) * 10, 10 );
 		color.x += starAmount;
 		color.y += starAmount;

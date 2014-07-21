@@ -63,18 +63,23 @@ void main()
 		float dist = 2 * max( 0, min( 0.5, 0.6-length( vNewUv - vec2( 0.5, 0.5 ) ) ) );
 		color = texture2D(tex, vNewUv );
 		
+		vec4 deepestWater = vec4( 0, 0.13, 0.22, 1 );
+		vec4 deeperWater = vec4( 0, 0.14, 0.24, 1 );
+		vec4 deepWater = vec4( 0, 0.17, 0.28, 1 );
 		vec4 water = vec4( 0, 0.2, 0.3, 1 );
 		vec4 waterFroth = vec4( 0.8, 0.9, 1.0, 1 );
 		vec4 sand = vec4( 1, 0.8, 0.4, 1 );
-		vec4 dirt = vec4( .5, 0.4, 0.2, 1 );
+		vec4 mountain = vec4( .5, 0.4, 0.2, 1 );
+		vec4 mountainBase = vec4( .4, 0.4, 0.3, 1 );
 		vec4 darkSand = vec4( 0.6, 0.4, 0.3, 1 );
+		vec4 forest = vec4( 0.2, 0.45, 0.0, 1 );
 		vec4 grass = vec4( 0.4, 0.6, 0.1, 1 );
-		vec4 canopy = vec4( 0.9, 0.8, 0.9, 1 );
+		vec4 canopy = vec4( 0.9, 0.8, 1, 1 );
 		
 		float xMult = 2, yMult = 3;
 		float cutOff = 0.35 + sin(timey+vNewUv.x*xMult+vNewUv.y*yMult)*0.02;
-		float points[] = float[8]( 0, 0.34 + sin(timey+vNewUv.x*xMult+vNewUv.y*yMult - 0.5)*0.02, 0.35 + sin(timey+vNewUv.x*xMult+vNewUv.y*yMult)*0.02, 0.355 - sin(timey+vNewUv.x*xMult+vNewUv.y*yMult + 3.1415/2)*0.015, 0.5, 0.65 ,0.8, 1 ); 
-		vec4 colorParts[] = vec4[7]( water, waterFroth, darkSand, sand, grass, dirt, canopy );
+		float points[] = float[13]( 0, 0.05, 0.1, 0.25, 0.34 + sin(timey+vNewUv.x*xMult+vNewUv.y*yMult - 0.5)*0.02, 0.35 + sin(timey+vNewUv.x*xMult+vNewUv.y*yMult)*0.02, 0.355 - sin(timey+vNewUv.x*xMult+vNewUv.y*yMult + 3.1415/2)*0.015, 0.39, 0.47, 0.58 ,0.65, 0.78, 1 ); 
+		vec4 colorParts[] = vec4[12]( deepestWater, deeperWater, deepWater, water, waterFroth, darkSand, sand, grass, forest, mountainBase, mountain, canopy );
 		
 		if (color.r*dist < cutOff )
 		{
@@ -87,11 +92,11 @@ void main()
 		}
 		bool found = false;
 		
-		for( int i = 0; i < 8 && !found; i++ )
+		for( int i = 0; i < 12 && !found; i++ )
 		{
 			if (points[i]>=color.r * dist)
 			{
-				color = colorParts[ min(i-1,6) ];
+				color = colorParts[ min(i-1,10) ];
 				found = true;
 			}
 		}
