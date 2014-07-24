@@ -80,7 +80,18 @@ public:
 
 		inline TextureInfo(){};
 		inline TextureInfo( unsigned int texture );
-	} textureInfos[10];
+	} textureInfos[100];
+
+	struct FrameBufferInfo
+	{
+		unsigned int frameBufferId;
+		TextureInfo *colorTexture, *depthTexture;
+
+		int width, height;
+
+		inline FrameBufferInfo(){};
+		inline FrameBufferInfo( unsigned int texture, TextureInfo* color, TextureInfo* depth, int width, int height );
+	} framebufferInfos[10];
 
 	struct UniformInfo
 	{
@@ -170,11 +181,17 @@ public:
 	void setUniformParameter( ShaderInfo* shader, const char* name, GeneralGlWindow::ParameterType parameterType, const float* value);
 	void setUniformParameter( Renderable* renderable, const char* name, GeneralGlWindow::ParameterType parameterType, const float* value);
 
+	FrameBufferInfo* createFrameBuffer(int width, int height);
+
 	TextureInfo* addTexture(const char* fileName);
 	TextureInfo* addTexture(QImage * image);
+	TextureInfo* addTexture(int width, int height, GLenum component = GL_RGBA, GLenum format = GL_RGBA, GLenum type = GL_UNSIGNED_BYTE);
 
 	void updateTexture(TextureInfo* texture, const char* fileName);
 	void updateTexture(TextureInfo* texture, QImage * image);
+
+	void setRenderTarget( FrameBufferInfo * frameBuffer );
+	void resetRenderTarget();
 
 private:
 	BufferInfo* nextFreeBuffer( int size );

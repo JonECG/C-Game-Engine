@@ -485,6 +485,49 @@ void GeneralGlWindow::setUniformParameter( Renderable* renderable, const char* n
 	setUniformParameter( renderable->howShader, name, parameterType, value );
 }
 
+GeneralGlWindow::FrameBufferInfo* GeneralGlWindow::createFrameBuffer(int width, int height)
+{
+	
+	TextureInfo * col = addTexture( width, height );
+	TextureInfo * depth = addTexture( width, height, GL_DEPTH_COMPONENT32, GL_DEPTH_COMPONENT, GL_FLOAT );
+	
+
+	static int currentFrameBufferIndex = 0;
+
+	unsigned int frameBufferId;
+
+	int errorPre = glGetError();
+
+	glActiveTexture( GL_TEXTURE0 );
+	int errorOne = glGetError();
+	glGenFramebuffers( 1, &frameBufferId );
+	int errorTwo = glGetError();
+	glBindFramebuffer( GL_DRAW_FRAMEBUFFER, frameBufferId );
+	int errorThree = glGetError();
+
+	glFramebufferTexture2D( GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, col->textureID, 0 );
+	glFramebufferTexture2D( GL_DRAW_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depth->textureID, 0 );
+
+	int errorFour = glGetError();
+
+	unsigned int status = glCheckFramebufferStatus( GL_DRAW_FRAMEBUFFER );
+	if( status != GL_FRAMEBUFFER_COMPLETE )
+	{
+		int error = glGetError();
+		std::cout << "NO FRAME BUFFER, BRO" << std::endl;
+	}
+
+	glBindFramebuffer( GL_DRAW_FRAMEBUFFER, 0 );
+
+	framebufferInfos[currentFrameBufferIndex] = FrameBufferInfo( frameBufferId, col, depth, width, height );
+
+	currentFrameBufferIndex++;
+
+	return &framebufferInfos[currentFrameBufferIndex - 1];
+}
+
+int currentTextureIndex = 0;
+
 GeneralGlWindow::TextureInfo* GeneralGlWindow::addTexture(const char* fileName)
 {
 	static QImage image;
@@ -496,14 +539,28 @@ GeneralGlWindow::TextureInfo* GeneralGlWindow::addTexture(QImage * inputImage)
 {
 	unsigned int texture;
 	glGenTextures( 1, &texture );
-	
-
-	static int currentTextureIndex = 0;
 
 	textureInfos[ currentTextureIndex ] = TextureInfo( texture );
 	currentTextureIndex++;
 
 	updateTexture( &textureInfos[ currentTextureIndex-1 ], inputImage );
+
+	return &textureInfos[ currentTextureIndex-1 ];
+}
+
+GeneralGlWindow::TextureInfo* GeneralGlWindow::addTexture(int width, int height, GLenum component, GLenum format, GLenum type)
+{
+	unsigned int texture;
+	glGenTextures( 1, &texture );
+
+	textureInfos[ currentTextureIndex ] = TextureInfo( texture );
+	currentTextureIndex++;
+
+	glBindTexture( GL_TEXTURE_2D, texture );
+	glTexImage2D(GL_TEXTURE_2D, 0, component, width, height, 0, format, type, 0);
+	
+	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
+	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
 
 	return &textureInfos[ currentTextureIndex-1 ];
 }
@@ -689,4 +746,15 @@ void GeneralGlWindow::Renderable::draw()
 		glBindVertexArray( whatGeometry->vertexArrayID );
 		glDrawElements( whatGeometry->indexingMode, whatGeometry->numIndices, GL_UNSIGNED_SHORT, (void*)whatGeometry->bufferOffset );
 	}
+}
+
+void GeneralGlWindow::setRenderTarget( GeneralGlWindow::FrameBufferInfo * fb )
+{
+	glViewport( 0, 0, fb->width, fb->height );
+	glBindFramebuffer( GL_DRAW_FRAMEBUFFER, fb->frameBufferId );
+}
+
+void GeneralGlWindow::resetRenderTarget()
+{
+	glBindFramebuffer( GL_DRAW_FRAMEBUFFER, 0 );
 }

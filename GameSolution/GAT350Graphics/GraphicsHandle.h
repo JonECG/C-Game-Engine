@@ -13,6 +13,7 @@ class GraphicsHandle : public GeneralGlWindow
 protected:
 	void init();
 	void paint();
+	void paintInner();
 	void update( float dt );
 };
 

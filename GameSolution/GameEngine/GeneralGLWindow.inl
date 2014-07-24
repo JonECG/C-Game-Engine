@@ -50,6 +50,16 @@ GeneralGlWindow::TextureInfo::TextureInfo( unsigned int texture )
 	textureID = texture;
 }
 
+GeneralGlWindow::FrameBufferInfo::FrameBufferInfo( unsigned int fbid, GeneralGlWindow::TextureInfo *color, GeneralGlWindow::TextureInfo *depth, int width, int height )
+{
+	this->frameBufferId = fbid;
+	this->colorTexture = color;
+	this->depthTexture = depth;
+
+	this->width = width;
+	this->height = height;
+}
+
 GeneralGlWindow::UniformInfo::UniformInfo( int locationIn, const char * name, const float* dataIn, ParameterType typeIn )
 {
 	location = locationIn;

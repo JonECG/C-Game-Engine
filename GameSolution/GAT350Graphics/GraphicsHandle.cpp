@@ -51,7 +51,12 @@ float perlinOctaves = 11, perlinFrequency = 10, perlinPersistence = 0.5, perlinS
 bool goOnSurface = false;
 QImage * img = new QImage();
 
-bool showFirstLab, showSecondLab, showThirdLab, showFourthLab, showFifthLab, showSixthLab;
+GeneralGlWindow::FrameBufferInfo *frameBuffer;
+GeneralGlWindow::Renderable *plane1, *plane2;
+
+GeneralGlWindow::ShaderInfo *hudShad, *hudDepthShad;
+
+bool showFirstLab, showSecondLab, showThirdLab, showFourthLab, showFifthLab, showSixthLab, showSeventhLab;
 
 Neumont::ShapeData makeCube()
 {
@@ -112,6 +117,47 @@ Neumont::ShapeData makeCube()
 	result.verts[i++].color = glm::vec4( -1, 0, 0, 1 );
 	//Normal: <0,-1,0> -- Tangent: <-1,0,0,1>
 	result.verts[i++].color = glm::vec4( -1, 0, 0, 1 );
+
+	return result;
+}
+
+Neumont::ShapeData makeCoolPlane()
+{
+	Neumont::ShapeData result = Neumont::ShapeData();
+
+	result.numVerts = 4;
+	result.numIndices = 6;
+
+	result.indices = new ushort[result.numIndices];
+	result.verts = new Neumont::Vertex[result.numVerts];
+
+	result.indices[0] = 0;
+	result.indices[1] = 1;
+	result.indices[2] = 2;
+
+	result.indices[3] = 0;
+	result.indices[4] = 2;
+	result.indices[5] = 3;
+
+	int i = 0; 
+	result.verts[i].uv = glm::vec2( 0, 0 );
+	result.verts[i].position = glm::vec3( 0, 0, 0.9f );
+	result.verts[i].normal = glm::vec3( 0, 1, 0 );
+	i++;
+
+	result.verts[i].uv = glm::vec2( 1, 0 );
+	result.verts[i].position = glm::vec3( 1, 0, 0.9f );
+	result.verts[i].normal = glm::vec3( 0, 1, 0 );
+	i++;
+
+	result.verts[i].uv = glm::vec2( 1, 1 );
+	result.verts[i].position = glm::vec3( 1, 1, 0.9f );
+	result.verts[i].normal = glm::vec3( 0, 1, 0 );
+	i++;
+
+	result.verts[i].uv = glm::vec2( 0, 1 );
+	result.verts[i].position = glm::vec3( 0, 1, 0.9f );
+	result.verts[i].normal = glm::vec3( 0, 1, 0 );
 
 	return result;
 }
@@ -193,6 +239,7 @@ void GraphicsHandle::init()
 	showFourthLab = false;
 	showFifthLab = false;
 	showSixthLab = true;
+	showSeventhLab = true;
 
 	specAmount = 100;
 	lightPos = glm::vec3(-1.0f,1.0f,3.0f);
@@ -210,6 +257,8 @@ void GraphicsHandle::init()
 	ogreShader = addShaderInfo( "res/texture.vert", "res/ogre.frag" );
 	perlinShad = addShaderInfo( "res/perlin.vert", "res/perlin.frag" );
 	starShad = addShaderInfo( "res/texture.vert", "res/stars.frag" );
+	hudShad = addShaderInfo( "res/noCamera.vert", "res/noCamera.frag" );
+	hudDepthShad = addShaderInfo( "res/noCamera.vert", "res/depthPlz.frag" );
 
 	GeneralGlWindow::TextureInfo * marioAndWeegee = addTexture( "res/marioAndLuigi.png" );
 	GeneralGlWindow::TextureInfo * marioAndWeegeeTrans = addTexture( "res/marioAndLuigiTrans.png" );
@@ -229,10 +278,13 @@ void GraphicsHandle::init()
 	GeneralGlWindow::TextureInfo * ogreAmbientOcclusion = addTexture( "res/ogreAmbientOcclusion.png" );
 	GeneralGlWindow::TextureInfo * ogreNormal = addTexture( "res/ogreNormal.png" );
 
-
+	frameBuffer = createFrameBuffer( 512, 512 );
 
 	Neumont::ShapeData charData = Neumont::ShapeGenerator::makePlane(2);
 	GeneralGlWindow::GeometryInfo * charGeo = addGeometry( charData.verts, charData.numVerts, charData.indices, charData.numIndices, GL_TRIANGLES );
+
+	Neumont::ShapeData fancyPlane = makeCoolPlane();
+	GeneralGlWindow::GeometryInfo * planeGeo = addGeometry( fancyPlane.verts, fancyPlane.numVerts, fancyPlane.indices, fancyPlane.numIndices, GL_TRIANGLES );
 
 	Neumont::ShapeData cubeData = makeCube();
 	GeneralGlWindow::GeometryInfo * cubeGeo = addGeometry( cubeData.verts, cubeData.numVerts, cubeData.indices, cubeData.numIndices, GL_TRIANGLES );
@@ -251,6 +303,7 @@ void GraphicsHandle::init()
 	GeneralGlWindow::GeometryInfo * ogreGeo = loadFile( "res/bs_ears.mod" );
 	
 	setUpAttribs( charGeo );
+	setUpAttribs( planeGeo );
 	setUpAttribs( cubeGeo );
 	setUpAttribs( potGeo );
 	setUpAttribs( ogreGeo );
@@ -280,6 +333,8 @@ void GraphicsHandle::init()
 	perlinShow = addRenderable( sphereGeo, glm::rotate( glm::mat4(), 90.0f, glm::vec3( 1,0, 0 ) ), perlinShad, perlinMap );
 	starrySky = addRenderable( sphereGeo, glm::mat4(), starShad, perlinMap );
 
+	plane1 = addRenderable( planeGeo, glm::translate( glm::vec3( 0.5, 0.5, 0 ) ) * glm::scale( glm::vec3( 0.5 ) ), hudShad, frameBuffer->colorTexture );
+	plane2 = addRenderable( planeGeo, glm::translate( glm::vec3( 0.5, 0, 0 ) ) * glm::scale( glm::vec3( 0.5 ) ), hudDepthShad, frameBuffer->depthTexture );
 
 	tightness = 40.0f;
 
@@ -299,34 +354,11 @@ void GraphicsHandle::init()
 	addUniformParameter( "timey", PT_FLOAT, &timey);
 
 
-	
-
-
 	addUniformParameter( ogreShader, "pleaseColor", PT_FLOAT, (float*)&(useDiffuseF) );
 	addUniformParameter( ogreShader, "pleaseNormal", PT_FLOAT, (float*)&(useNormalF) );
 	addUniformParameter( ogreShader, "pleaseAmbient", PT_FLOAT, (float*)&(useAmbientF) );
 
-	DebugMenus::toggleBool( "Show Binary Alpha Lab", showFirstLab, "Binary Alpha" );
-
-	DebugMenus::toggleBool( "Show Alpha Lab", showSecondLab, "Alpha" );
-
-	DebugMenus::toggleBool( "Show World Normal Lab", showThirdLab, "World Normal" );
-	DebugMenus::slideVector( "Light Position", lightPos, -5, 5, "World Normal" );
-	DebugMenus::slideFloat( "Spec Amount", specAmount, 0, 1000, "World Normal" );
-	DebugMenus::slideFloat( "Normal Fade", normalFade, 0, 1, "World Normal" );
-
-	DebugMenus::toggleBool( "Show Tangent Normal Lab", showFourthLab, "Tangent Normal" );
-	DebugMenus::slideVector( "Light Position", lightPos, -5, 5, "Tangent Normal" );
-	DebugMenus::slideVector( "Cube Rotation", rotateTangentCube, 0, 360, "Tangent Normal" );
-	DebugMenus::slideFloat( "Spec Amount", specAmount, 0, 1000, "Tangent Normal" );
-	DebugMenus::slideFloat( "Normal Fade", normalFade, 0, 1, "Tangent Normal" );
-
-	DebugMenus::toggleBool( "Show Ogre Lab", showFifthLab, "RAGHR OGRE" );
-	DebugMenus::slideVector( "Light Position", lightPos, -5, 5, "RAGHR OGRE" );
-	DebugMenus::slideVector( "Ogre Rotation", rotateOgre, 0, 360, "RAGHR OGRE" );
-	DebugMenus::toggleBool( "Use Diffuse", useDiffuse, "RAGHR OGRE" );
-	DebugMenus::toggleBool( "Use Normal", useNormal, "RAGHR OGRE" );
-	DebugMenus::toggleBool( "Use AO", useAmbient, "RAGHR OGRE" );
+	DebugMenus::toggleBool( "Show Color+Depth", showSeventhLab, "Frame Buffers" );
 
 	DebugMenus::toggleBool( "Show Perlin Lab", showSixthLab, "Perlin" );
 	DebugMenus::slideFloat( "Seed", perlinSeed, 0, 100, "Perlin" );
@@ -336,14 +368,63 @@ void GraphicsHandle::init()
 	DebugMenus::slideFloat( "Lacunarity", perlinLacunarity, 0, 10, "Perlin" );
 	DebugMenus::slideFloat( "Sampled Z", perlinZ, 0, 1, "Perlin" );
 	DebugMenus::toggleBool( "Planet Walk", goOnSurface, "Perlin" );
+
+	DebugMenus::toggleBool( "Show Ogre Lab", showFifthLab, "RAGHR OGRE" );
+	DebugMenus::slideVector( "Light Position", lightPos, -5, 5, "RAGHR OGRE" );
+	DebugMenus::slideVector( "Ogre Rotation", rotateOgre, 0, 360, "RAGHR OGRE" );
+	DebugMenus::toggleBool( "Use Diffuse", useDiffuse, "RAGHR OGRE" );
+	DebugMenus::toggleBool( "Use Normal", useNormal, "RAGHR OGRE" );
+	DebugMenus::toggleBool( "Use AO", useAmbient, "RAGHR OGRE" );
+
+	/*DebugMenus::toggleBool( "Show Tangent Normal Lab", showFourthLab, "Tangent Normal" );
+	DebugMenus::slideVector( "Light Position", lightPos, -5, 5, "Tangent Normal" );
+	DebugMenus::slideVector( "Cube Rotation", rotateTangentCube, 0, 360, "Tangent Normal" );
+	DebugMenus::slideFloat( "Spec Amount", specAmount, 0, 1000, "Tangent Normal" );
+	DebugMenus::slideFloat( "Normal Fade", normalFade, 0, 1, "Tangent Normal" );*/
+
+	/*DebugMenus::toggleBool( "Show World Normal Lab", showThirdLab, "World Normal" );
+	DebugMenus::slideVector( "Light Position", lightPos, -5, 5, "World Normal" );
+	DebugMenus::slideFloat( "Spec Amount", specAmount, 0, 1000, "World Normal" );
+	DebugMenus::slideFloat( "Normal Fade", normalFade, 0, 1, "World Normal" );*/
+
+	//DebugMenus::toggleBool( "Show Alpha Lab", showSecondLab, "Alpha" );
+
+	//DebugMenus::toggleBool( "Show Binary Alpha Lab", showFirstLab, "Binary Alpha" );
+
+	
+
+	
+
+	
+
+	
+
+	
 }
 
 float angle = 0;
 
 void GraphicsHandle::paint()
 {
-	camera.setAspect( float(width())/height() );
+	if( showSeventhLab )
+	{
+		setRenderTarget( frameBuffer );
+		paintInner();
+		resetRenderTarget();
+	}
 	glViewport( 0, 0, width(), height() );
+	paintInner();
+
+	if( showSeventhLab )
+	{
+		plane1->draw();
+		plane2->draw();
+	}
+}
+
+void GraphicsHandle::paintInner()
+{
+	camera.setAspect( float(width())/height() );
 	glClearColor( 0.5, 0.1, 0.1, 0 );
 	glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 
