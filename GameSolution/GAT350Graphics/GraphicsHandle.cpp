@@ -59,6 +59,8 @@ GeneralGlWindow::ShaderInfo *hudShad, *hudDepthShad;
 GeneralGlWindow::FrameBufferInfo *shadowBuffer;
 GeneralGlWindow::Renderable *plane3, *backPlane;
 GeneralGlWindow::ShaderInfo *perlinShadWithShadow, *textShadWithShadow;
+Camera lightCamera;
+bool useLightCamera = false;
 
 bool showFirstLab, showSecondLab, showThirdLab, showFourthLab, showFifthLab, showSixthLab, showSeventhLab, showEighthLab;
 
@@ -347,6 +349,9 @@ void GraphicsHandle::init()
 	plane3 = addRenderable( planeGeo, glm::translate( glm::vec3( 0.5, 0.5, 0 ) ) * glm::scale( glm::vec3( 0.5 ) ), hudDepthShad, shadowBuffer->depthTexture );
 	backPlane = addRenderable( charGeo, glm::translate( glm::vec3( 0.5, -1.5, -3 ) ) * glm::rotate( glm::mat4(), 90.0f, glm::vec3( 1,0, 0 ) ) * glm::scale( glm::vec3( 4 ) ), textShadWithShadow, sky, shadowBuffer->depthTexture );
 	
+	lightCamera = Camera( float(width())/height(), 0.01, 20 );
+	lightCamera.setFrom( lightPos );
+	lightCamera.setTo( glm::vec3(0,0,0) );
 
 	tightness = 40.0f;
 
@@ -372,6 +377,7 @@ void GraphicsHandle::init()
 
 	DebugMenus::toggleBool( "Show Shadows for Planet", showEighthLab, "Shadow" );
 	DebugMenus::slideVector( "Light Position", lightPos, -5, 5, "Shadow" );
+	DebugMenus::toggleBool( "Use light camera", useLightCamera, "Shadow" );
 
 	DebugMenus::toggleBool( "Show Color+Depth", showSeventhLab, "Frame Buffers" );
 
@@ -424,7 +430,8 @@ void GraphicsHandle::paint()
 		glm::vec3 toe = camera.to;
 
 		camera.from = lightPos;
-		camera.to = glm::vec3( -1,0,0 );
+		lightCamera.from = lightPos;
+		camera.to = lightCamera.to;
 
 		camera.calcModelViewProjection();
 		setUniformParameter( "lightMvp", ParameterType::PT_MAT4, (float*)&camera.mvp );
@@ -439,9 +446,29 @@ void GraphicsHandle::paint()
 
 		camera.from = fro;
 		camera.to = toe;
+		camera.calcModelViewProjection();
 	}
 	glViewport( 0, 0, width(), height() );
-	paintInner();
+	if( useLightCamera )
+	{
+		glm::vec3 fro = camera.from;
+		glm::vec3 toe = camera.to;
+
+		camera.from = lightCamera.from;
+		camera.to = lightCamera.to;
+
+		camera.calcModelViewProjection();
+
+		paintInner();
+
+		camera.from = fro;
+		camera.to = toe;
+		camera.calcModelViewProjection();
+	}
+	else
+	{
+		paintInner();
+	}
 
 	if( showSeventhLab )
 	{
@@ -639,22 +666,26 @@ void GraphicsHandle::mouseMoveEvent( QMouseEvent * mEvent )
 {
 	if ( mouseTracking )
 	{
+		Camera* cam = (useLightCamera) ? &lightCamera : &camera;
+
 		glm::vec2 currentPosition = glm::vec2( mEvent->x()/float(width()), mEvent->y()/float(height()));
 
 		glm::vec2 delta = currentPosition-mousePosition;
 
-		glm::vec3 camNorm = glm::normalize( camera.getTo()-camera.getFrom() );
+		glm::vec3 camNorm = glm::normalize( cam->getTo()-cam->getFrom() );
 
-		glm::vec3 rotUp = glm::cross( camera.up, camNorm );
+		glm::vec3 rotUp = glm::cross( cam->up, camNorm );
 		glm::vec3 rotRight = glm::cross( rotUp, camNorm );
 
 
-		camera.setTo( camera.getFrom() + glm::rotate( glm::rotate( camNorm, delta.y*100, rotUp ), delta.x*100, rotRight ) );
+		cam->setTo( cam->getFrom() + glm::rotate( glm::rotate( camNorm, delta.y*100, rotUp ), delta.x*100, rotRight ) );
 		//camera.setTo( camera.getFrom() + glm::rotate( camNorm, delta.y*100, rotUp ) );
 		//camera.setTo( glm::vec3( mousePosition.x, mousePosition.y, 0 ) );
 
 		mousePosition.x = currentPosition.x;
 		mousePosition.y = currentPosition.y;
+
+		lightPos = lightCamera.from;
 	}
 }
 
@@ -668,10 +699,10 @@ void GraphicsHandle::update( float dt )
 	{
 		static glm::vec2 mousePosition = glm::vec2();
 
-		
+		Camera* cam = (useLightCamera) ? &lightCamera : &camera;
 
-		glm::vec3 camNorm = glm::normalize( camera.getTo()-camera.getFrom() );
-		glm::vec3 strafe = glm::normalize( -glm::cross( camera.up, camNorm ) );
+		glm::vec3 camNorm = glm::normalize( cam->getTo()-cam->getFrom() );
+		glm::vec3 strafe = glm::normalize( -glm::cross( cam->up, camNorm ) );
 		glm::vec3 up = glm::normalize( glm::cross( strafe, camNorm ) );
 
 		glm::mat3 camSpace = glm::mat3( strafe, camNorm, up );
@@ -684,8 +715,10 @@ void GraphicsHandle::update( float dt )
 
 			glm::vec3 worldMove = camSpace*movement * dt * ( (goOnSurface)? 0.1f : 1.0f );
 
-		camera.setTo( camera.getTo() + worldMove);
-		camera.setFrom( camera.getFrom() + worldMove);
+		cam->setTo( cam->getTo() + worldMove);
+		cam->setFrom( cam->getFrom() + worldMove);
+
+		lightPos = lightCamera.from;
 	}
 	
 
