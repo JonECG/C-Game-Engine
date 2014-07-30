@@ -56,7 +56,11 @@ GeneralGlWindow::Renderable *plane1, *plane2;
 
 GeneralGlWindow::ShaderInfo *hudShad, *hudDepthShad;
 
-bool showFirstLab, showSecondLab, showThirdLab, showFourthLab, showFifthLab, showSixthLab, showSeventhLab;
+GeneralGlWindow::FrameBufferInfo *shadowBuffer;
+GeneralGlWindow::Renderable *plane3, *backPlane;
+GeneralGlWindow::ShaderInfo *perlinShadWithShadow, *textShadWithShadow;
+
+bool showFirstLab, showSecondLab, showThirdLab, showFourthLab, showFifthLab, showSixthLab, showSeventhLab, showEighthLab;
 
 Neumont::ShapeData makeCube()
 {
@@ -239,7 +243,8 @@ void GraphicsHandle::init()
 	showFourthLab = false;
 	showFifthLab = false;
 	showSixthLab = true;
-	showSeventhLab = true;
+	showSeventhLab = false;
+	showEighthLab = true;
 
 	specAmount = 100;
 	lightPos = glm::vec3(-1.0f,1.0f,3.0f);
@@ -259,6 +264,8 @@ void GraphicsHandle::init()
 	starShad = addShaderInfo( "res/texture.vert", "res/stars.frag" );
 	hudShad = addShaderInfo( "res/noCamera.vert", "res/noCamera.frag" );
 	hudDepthShad = addShaderInfo( "res/noCamera.vert", "res/depthPlz.frag" );
+	perlinShadWithShadow = addShaderInfo( "res/perlin.vert", "res/perlinWithShad.frag" );
+	textShadWithShadow = addShaderInfo( "res/texture.vert", "res/textureWithShad.frag" );
 
 	GeneralGlWindow::TextureInfo * marioAndWeegee = addTexture( "res/marioAndLuigi.png" );
 	GeneralGlWindow::TextureInfo * marioAndWeegeeTrans = addTexture( "res/marioAndLuigiTrans.png" );
@@ -279,6 +286,7 @@ void GraphicsHandle::init()
 	GeneralGlWindow::TextureInfo * ogreNormal = addTexture( "res/ogreNormal.png" );
 
 	frameBuffer = createFrameBuffer( 512, 512 );
+	shadowBuffer = createFrameBuffer( 1024, 1024 );
 
 	Neumont::ShapeData charData = Neumont::ShapeGenerator::makePlane(2);
 	GeneralGlWindow::GeometryInfo * charGeo = addGeometry( charData.verts, charData.numVerts, charData.indices, charData.numIndices, GL_TRIANGLES );
@@ -330,11 +338,15 @@ void GraphicsHandle::init()
 
 	QImage perlin( 512, 512, QImage::Format::Format_ARGB32 );
 	perlinMap = addTexture( &perlin );
-	perlinShow = addRenderable( sphereGeo, glm::rotate( glm::mat4(), 90.0f, glm::vec3( 1,0, 0 ) ), perlinShad, perlinMap );
+	perlinShow = addRenderable( sphereGeo, glm::rotate( glm::mat4(), 90.0f, glm::vec3( 1,0, 0 ) ), perlinShad, perlinMap, shadowBuffer->depthTexture );
 	starrySky = addRenderable( sphereGeo, glm::mat4(), starShad, perlinMap );
 
 	plane1 = addRenderable( planeGeo, glm::translate( glm::vec3( 0.5, 0.5, 0 ) ) * glm::scale( glm::vec3( 0.5 ) ), hudShad, frameBuffer->colorTexture );
 	plane2 = addRenderable( planeGeo, glm::translate( glm::vec3( 0.5, 0, 0 ) ) * glm::scale( glm::vec3( 0.5 ) ), hudDepthShad, frameBuffer->depthTexture );
+
+	plane3 = addRenderable( planeGeo, glm::translate( glm::vec3( 0.5, 0.5, 0 ) ) * glm::scale( glm::vec3( 0.5 ) ), hudDepthShad, shadowBuffer->depthTexture );
+	backPlane = addRenderable( charGeo, glm::translate( glm::vec3( 0.5, -1.5, -3 ) ) * glm::rotate( glm::mat4(), 90.0f, glm::vec3( 1,0, 0 ) ) * glm::scale( glm::vec3( 4 ) ), textShadWithShadow, sky, shadowBuffer->depthTexture );
+	
 
 	tightness = 40.0f;
 
@@ -357,6 +369,9 @@ void GraphicsHandle::init()
 	addUniformParameter( ogreShader, "pleaseColor", PT_FLOAT, (float*)&(useDiffuseF) );
 	addUniformParameter( ogreShader, "pleaseNormal", PT_FLOAT, (float*)&(useNormalF) );
 	addUniformParameter( ogreShader, "pleaseAmbient", PT_FLOAT, (float*)&(useAmbientF) );
+
+	DebugMenus::toggleBool( "Show Shadows for Planet", showEighthLab, "Shadow" );
+	DebugMenus::slideVector( "Light Position", lightPos, -5, 5, "Shadow" );
 
 	DebugMenus::toggleBool( "Show Color+Depth", showSeventhLab, "Frame Buffers" );
 
@@ -390,15 +405,6 @@ void GraphicsHandle::init()
 	//DebugMenus::toggleBool( "Show Alpha Lab", showSecondLab, "Alpha" );
 
 	//DebugMenus::toggleBool( "Show Binary Alpha Lab", showFirstLab, "Binary Alpha" );
-
-	
-
-	
-
-	
-
-	
-
 	
 }
 
@@ -412,6 +418,28 @@ void GraphicsHandle::paint()
 		paintInner();
 		resetRenderTarget();
 	}
+	if( showEighthLab )
+	{
+		glm::vec3 fro = camera.from;
+		glm::vec3 toe = camera.to;
+
+		camera.from = lightPos;
+		camera.to = glm::vec3( -1,0,0 );
+
+		camera.calcModelViewProjection();
+		setUniformParameter( "lightMvp", ParameterType::PT_MAT4, (float*)&camera.mvp );
+
+		perlinShow->howShader = perlinShadWithShadow;
+
+		setRenderTarget( shadowBuffer );
+		paintInner();
+		resetRenderTarget();
+
+		perlinShow->howShader = perlinShadWithShadow;
+
+		camera.from = fro;
+		camera.to = toe;
+	}
 	glViewport( 0, 0, width(), height() );
 	paintInner();
 
@@ -419,6 +447,13 @@ void GraphicsHandle::paint()
 	{
 		plane1->draw();
 		plane2->draw();
+	}
+	if( showEighthLab )
+	{
+		plane3->draw();
+		setUniformParameter( "diffpos", PT_VEC4, (float*)&glm::vec4(lightPos,1) );
+		lightCube->where = glm::translate( lightPos )*glm::scale( glm::vec3( 0.05 ) );
+		lightCube->draw();
 	}
 }
 
@@ -566,6 +601,10 @@ void GraphicsHandle::paintInner()
 		starrySky->draw();
 
 		perlinShow->draw();
+	}
+	if( showEighthLab )
+	{
+		backPlane->draw();
 	}
 }
 
