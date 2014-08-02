@@ -62,7 +62,12 @@ GeneralGlWindow::ShaderInfo *perlinShadWithShadow, *textShadWithShadow;
 Camera lightCamera;
 bool useLightCamera = false;
 
-bool showFirstLab, showSecondLab, showThirdLab, showFourthLab, showFifthLab, showSixthLab, showSeventhLab, showEighthLab;
+GeneralGlWindow::TextureInfo *cubeMapSimple, *cubeMapFancy;
+GeneralGlWindow::ShaderInfo *environmentMapper, *skyBoxShad;
+GeneralGlWindow::Renderable *skybox, *environmentTarget;
+bool useFancyEnvironment = false;
+
+bool showFirstLab, showSecondLab, showThirdLab, showFourthLab, showFifthLab, showSixthLab, showSeventhLab, showEighthLab, showNinthLab;
 
 Neumont::ShapeData makeCube()
 {
@@ -244,9 +249,10 @@ void GraphicsHandle::init()
 	showThirdLab = false;
 	showFourthLab = false;
 	showFifthLab = false;
-	showSixthLab = true;
+	showSixthLab = false;
 	showSeventhLab = false;
-	showEighthLab = true;
+	showEighthLab = false;
+	showNinthLab = true;
 
 	specAmount = 100;
 	lightPos = glm::vec3(-1.0f,1.0f,3.0f);
@@ -268,6 +274,8 @@ void GraphicsHandle::init()
 	hudDepthShad = addShaderInfo( "res/noCamera.vert", "res/depthPlz.frag" );
 	perlinShadWithShadow = addShaderInfo( "res/perlin.vert", "res/perlinWithShad.frag" );
 	textShadWithShadow = addShaderInfo( "res/texture.vert", "res/textureWithShad.frag" );
+	environmentMapper = addShaderInfo( "res/texture.vert", "res/enviroMapped.frag" );
+	skyBoxShad = addShaderInfo( "res/texture.vert", "res/skyBox.frag" );
 
 	GeneralGlWindow::TextureInfo * marioAndWeegee = addTexture( "res/marioAndLuigi.png" );
 	GeneralGlWindow::TextureInfo * marioAndWeegeeTrans = addTexture( "res/marioAndLuigiTrans.png" );
@@ -286,6 +294,9 @@ void GraphicsHandle::init()
 	GeneralGlWindow::TextureInfo * ogreColor = addTexture( "res/ogreColor.png" );
 	GeneralGlWindow::TextureInfo * ogreAmbientOcclusion = addTexture( "res/ogreAmbientOcclusion.png" );
 	GeneralGlWindow::TextureInfo * ogreNormal = addTexture( "res/ogreNormal.png" );
+
+	cubeMapSimple = addTextureCubeMap( "res/simpleCubeMap/posx.png", "res/simpleCubeMap/posy.png", "res/simpleCubeMap/posz.png", "res/simpleCubeMap/negx.png", "res/simpleCubeMap/negy.png", "res/simpleCubeMap/negz.png" );
+	cubeMapFancy = addTextureCubeMap( "res/fancyCubeMap/posx.png", "res/fancyCubeMap/posy.png", "res/fancyCubeMap/posz.png", "res/fancyCubeMap/negx.png", "res/fancyCubeMap/negy.png", "res/fancyCubeMap/negz.png" );
 
 	frameBuffer = createFrameBuffer( 512, 512 );
 	shadowBuffer = createFrameBuffer( 1024, 1024 );
@@ -340,7 +351,7 @@ void GraphicsHandle::init()
 
 	QImage perlin( 512, 512, QImage::Format::Format_ARGB32 );
 	perlinMap = addTexture( &perlin );
-	perlinShow = addRenderable( sphereGeo, glm::rotate( glm::mat4(), 90.0f, glm::vec3( 1,0, 0 ) ), perlinShad, perlinMap, shadowBuffer->depthTexture );
+	perlinShow = addRenderable( sphereGeo, glm::rotate( glm::mat4(), 90.0f, glm::vec3( 1,0, 0 ) ), perlinShadWithShadow, perlinMap, shadowBuffer->depthTexture );
 	starrySky = addRenderable( sphereGeo, glm::mat4(), starShad, perlinMap );
 
 	plane1 = addRenderable( planeGeo, glm::translate( glm::vec3( 0.5, 0.5, 0 ) ) * glm::scale( glm::vec3( 0.5 ) ), hudShad, frameBuffer->colorTexture );
@@ -349,9 +360,12 @@ void GraphicsHandle::init()
 	plane3 = addRenderable( planeGeo, glm::translate( glm::vec3( 0.5, 0.5, 0 ) ) * glm::scale( glm::vec3( 0.5 ) ), hudDepthShad, shadowBuffer->depthTexture );
 	backPlane = addRenderable( charGeo, glm::translate( glm::vec3( 0.5, -1.5, -3 ) ) * glm::rotate( glm::mat4(), 90.0f, glm::vec3( 1,0, 0 ) ) * glm::scale( glm::vec3( 4 ) ), textShadWithShadow, sky, shadowBuffer->depthTexture );
 	
+	skybox = addRenderable( cubeGeo, glm::scale( glm::vec3( 10 ) ), skyBoxShad, nullptr, cubeMapSimple );
+	environmentTarget = addRenderable( potGeo, glm::translate( glm::vec3( -1, 0, 2 ) )*glm::rotate( -90.0f, glm::vec3( 1,0,0 ) )*glm::scale( glm::vec3( 0.25f ) ), environmentMapper, nullptr, cubeMapSimple );
+	
 	lightCamera = Camera( float(width())/height(), 0.01, 20 );
 	lightCamera.setFrom( lightPos );
-	lightCamera.setTo( glm::vec3(0,0,0) );
+	lightCamera.setTo( glm::vec3(-1,0,0) );
 
 	tightness = 40.0f;
 
@@ -374,6 +388,9 @@ void GraphicsHandle::init()
 	addUniformParameter( ogreShader, "pleaseColor", PT_FLOAT, (float*)&(useDiffuseF) );
 	addUniformParameter( ogreShader, "pleaseNormal", PT_FLOAT, (float*)&(useNormalF) );
 	addUniformParameter( ogreShader, "pleaseAmbient", PT_FLOAT, (float*)&(useAmbientF) );
+
+	DebugMenus::toggleBool( "Show Environment Mapping Lab", showNinthLab, "Environment Map" );
+	DebugMenus::toggleBool( "Use Fancy Environment Map", useFancyEnvironment, "Environment Map" );
 
 	DebugMenus::toggleBool( "Show Shadows for Planet", showEighthLab, "Shadow" );
 	DebugMenus::slideVector( "Light Position", lightPos, -5, 5, "Shadow" );
@@ -479,8 +496,8 @@ void GraphicsHandle::paint()
 	{
 		plane3->draw();
 		setUniformParameter( "diffpos", PT_VEC4, (float*)&glm::vec4(lightPos,1) );
-		lightCube->where = glm::translate( lightPos )*glm::scale( glm::vec3( 0.05 ) );
-		lightCube->draw();
+		//lightCube->where = glm::translate( lightPos )*glm::scale( glm::vec3( 0.05 ) );
+		//lightCube->draw();
 	}
 }
 
@@ -545,7 +562,7 @@ void GraphicsHandle::paintInner()
 		useAmbientF = (useAmbient) ? 1 : 0;
 	}
 
-	if( showSixthLab )
+	if( showSixthLab || showEighthLab )
 	{
 		static float prevFreq, prevLac, prevSeed, prevZ, prevPers;
 		static int prevOct;
@@ -632,6 +649,15 @@ void GraphicsHandle::paintInner()
 	if( showEighthLab )
 	{
 		backPlane->draw();
+	}
+	if( showNinthLab )
+	{
+		skybox->trans = ( useFancyEnvironment ) ? cubeMapFancy : cubeMapSimple;
+		environmentTarget->trans = ( useFancyEnvironment ) ? cubeMapFancy : cubeMapSimple;
+
+		skybox->where = glm::translate( camera.from ) * glm::scale( glm::vec3(10) );
+		skybox->draw();
+		environmentTarget->draw();
 	}
 }
 

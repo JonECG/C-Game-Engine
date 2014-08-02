@@ -32,6 +32,7 @@ public:
 	enum ParameterType
 	{
 		// These values matter:
+		PT_INT = 0,
 		PT_FLOAT = sizeof(float) * 1,
 		PT_VEC2 = sizeof(float) * 2,
 		PT_VEC3 = sizeof(float) * 3,
@@ -91,7 +92,7 @@ public:
 
 		inline FrameBufferInfo(){};
 		inline FrameBufferInfo( unsigned int texture, TextureInfo* color, TextureInfo* depth, int width, int height );
-	} framebufferInfos[10];
+	} framebufferInfos[50];
 
 	struct UniformInfo
 	{
@@ -125,7 +126,7 @@ public:
 
 		GLuint numUniformParameters;
 		UniformInfo uniformParameters[20];
-	} shaderInfos[10];
+	} shaderInfos[50];
 
 	struct Renderable
 	{
@@ -186,6 +187,8 @@ public:
 	TextureInfo* addTexture(const char* fileName);
 	TextureInfo* addTexture(QImage * image);
 	TextureInfo* addTexture(int width, int height, GLenum component = GL_RGBA, GLenum format = GL_RGBA, GLenum type = GL_UNSIGNED_BYTE);
+
+	TextureInfo* addTextureCubeMap(const char* positiveX, const char* positiveY, const char* positiveZ, const char* negativeX, const char* negativeY, const char* negativeZ );
 
 	void updateTexture(TextureInfo* texture, const char* fileName);
 	void updateTexture(TextureInfo* texture, QImage * image);

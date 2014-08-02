@@ -565,6 +565,47 @@ GeneralGlWindow::TextureInfo* GeneralGlWindow::addTexture(int width, int height,
 	return &textureInfos[ currentTextureIndex-1 ];
 }
 
+GeneralGlWindow::TextureInfo* GeneralGlWindow::addTextureCubeMap(const char* positiveX, const char* positiveY, const char* positiveZ, const char* negativeX, const char* negativeY, const char* negativeZ )
+{
+	unsigned int texture;
+	glGenTextures( 1, &texture );
+
+	textureInfos[ currentTextureIndex ] = TextureInfo( texture );
+	currentTextureIndex++;
+
+	glBindTexture(GL_TEXTURE_CUBE_MAP, texture);
+	QImage image;
+
+	image.load( positiveX );
+	image = convertToGLFormat( image );
+	glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X, 0, GL_RGBA, image.width(), image.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, image.bits());
+
+	image.load( positiveY );
+	image = convertToGLFormat( image );
+	glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_Y, 0, GL_RGBA, image.width(), image.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, image.bits());
+
+	image.load( positiveZ );
+	image = convertToGLFormat( image );
+	glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_Z, 0, GL_RGBA, image.width(), image.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, image.bits());
+	
+	image.load( negativeX );
+	image = convertToGLFormat( image );
+	glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_X, 0, GL_RGBA, image.width(), image.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, image.bits());
+
+	image.load( negativeY );
+	image = convertToGLFormat( image );
+	glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_Y, 0, GL_RGBA, image.width(), image.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, image.bits());
+
+	image.load( negativeZ );
+	image = convertToGLFormat( image );
+	glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_Z, 0, GL_RGBA, image.width(), image.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, image.bits());
+	
+	glTexParameteri( GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
+	glTexParameteri( GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+
+	return &textureInfos[ currentTextureIndex-1 ];
+}
+
 void GeneralGlWindow::updateTexture(TextureInfo* texture, const char* fileName)
 {
 	static QImage image;
@@ -598,6 +639,10 @@ void GeneralGlWindow::UniformInfo::send( GeneralGlWindow::ShaderInfo * shader )
 	{
 		switch( type )
 		{
+		case GeneralGlWindow::ParameterType::PT_INT:
+			glUniform1i( loc, *((int*)data) );
+			break;
+
 		case GeneralGlWindow::ParameterType::PT_FLOAT:
 			glUniform1f( loc, *data );
 			break;
@@ -679,7 +724,7 @@ void GeneralGlWindow::Renderable::draw()
 
 			glActiveTexture( GL_TEXTURE1 );
 
-			glBindTexture( GL_TEXTURE_2D, trans->textureID );
+			glBindTexture( GL_TEXTURE_CUBE_MAP, trans->textureID );
 
 			loc = glGetUniformLocation( howShader->shaderProgramID, "trans");
 			glUniform1i(loc, 1);
