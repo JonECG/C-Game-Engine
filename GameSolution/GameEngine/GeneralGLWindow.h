@@ -32,7 +32,7 @@ public:
 	enum ParameterType
 	{
 		// These values matter:
-		PT_INT = 0,
+		PT_INT = 1,
 		PT_FLOAT = sizeof(float) * 1,
 		PT_VEC2 = sizeof(float) * 2,
 		PT_VEC3 = sizeof(float) * 3,

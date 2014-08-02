@@ -724,6 +724,7 @@ void GeneralGlWindow::Renderable::draw()
 
 			glActiveTexture( GL_TEXTURE1 );
 
+			glBindTexture( GL_TEXTURE_2D, trans->textureID );
 			glBindTexture( GL_TEXTURE_CUBE_MAP, trans->textureID );
 
 			loc = glGetUniformLocation( howShader->shaderProgramID, "trans");
