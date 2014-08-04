@@ -121,12 +121,12 @@ void main()
 		color = colorInfluence;
 	}
 	
-	if( useTransMap != 0 )
-	{
-		vec4 transparency = texture2D(trans, vUv);
-		if( transparency.r < .3 )
-			discard;
-	}
+	// if( useTransMap != 0 )
+	// {
+		// vec4 transparency = texture2D(trans, vUv);
+		// if( transparency.r < .3 )
+			// discard;
+	// }
 	
 	if( useLighting != 0 )
 	{

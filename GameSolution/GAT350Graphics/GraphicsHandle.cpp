@@ -67,7 +67,11 @@ GeneralGlWindow::ShaderInfo *environmentMapper, *skyBoxShad;
 GeneralGlWindow::Renderable *skybox, *environmentTarget;
 bool useFancyEnvironment = false;
 
-bool showFirstLab, showSecondLab, showThirdLab, showFourthLab, showFifthLab, showSixthLab, showSeventhLab, showEighthLab, showNinthLab;
+float orbitRate = 0.2, currentRot = 0;
+GeneralGlWindow::ShaderInfo *litStarrySky;
+GeneralGlWindow::Renderable *sun;
+
+bool showFirstLab, showSecondLab, showThirdLab, showFourthLab, showFifthLab, showSixthLab, showSeventhLab, showEighthLab, showNinthLab, showCoolLab;
 
 Neumont::ShapeData makeCube()
 {
@@ -253,6 +257,7 @@ void GraphicsHandle::init()
 	showSeventhLab = false;
 	showEighthLab = false;
 	showNinthLab = true;
+	showCoolLab = false;
 
 	specAmount = 100;
 	lightPos = glm::vec3(-1.0f,1.0f,3.0f);
@@ -276,6 +281,7 @@ void GraphicsHandle::init()
 	textShadWithShadow = addShaderInfo( "res/texture.vert", "res/textureWithShad.frag" );
 	environmentMapper = addShaderInfo( "res/texture.vert", "res/enviroMapped.frag" );
 	skyBoxShad = addShaderInfo( "res/texture.vert", "res/skyBox.frag" );
+	litStarrySky = addShaderInfo( "res/texture.vert", "res/starLit.frag" );
 
 	GeneralGlWindow::TextureInfo * marioAndWeegee = addTexture( "res/marioAndLuigi.png" );
 	GeneralGlWindow::TextureInfo * marioAndWeegeeTrans = addTexture( "res/marioAndLuigiTrans.png" );
@@ -297,6 +303,8 @@ void GraphicsHandle::init()
 
 	cubeMapSimple = addTextureCubeMap( "res/simpleCubeMap/posx.png", "res/simpleCubeMap/posy.png", "res/simpleCubeMap/posz.png", "res/simpleCubeMap/negx.png", "res/simpleCubeMap/negy.png", "res/simpleCubeMap/negz.png" );
 	cubeMapFancy = addTextureCubeMap( "res/fancyCubeMap/posx.png", "res/fancyCubeMap/posy.png", "res/fancyCubeMap/posz.png", "res/fancyCubeMap/negx.png", "res/fancyCubeMap/negy.png", "res/fancyCubeMap/negz.png" );
+
+	GeneralGlWindow::TextureInfo * sunText = addTexture( "res/sun.png" );
 
 	frameBuffer = createFrameBuffer( 512, 512 );
 	shadowBuffer = createFrameBuffer( 1024, 1024 );
@@ -351,7 +359,7 @@ void GraphicsHandle::init()
 
 	QImage perlin( 512, 512, QImage::Format::Format_ARGB32 );
 	perlinMap = addTexture( &perlin );
-	perlinShow = addRenderable( sphereGeo, glm::rotate( glm::mat4(), 90.0f, glm::vec3( 1,0, 0 ) ), perlinShadWithShadow, perlinMap, shadowBuffer->depthTexture );
+	perlinShow = addRenderable( sphereGeo, glm::rotate( glm::mat4(), 90.0f, glm::vec3( 1,0, 0 ) ), perlinShad, perlinMap, shadowBuffer->depthTexture );
 	starrySky = addRenderable( sphereGeo, glm::mat4(), starShad, perlinMap );
 
 	plane1 = addRenderable( planeGeo, glm::translate( glm::vec3( 0.5, 0.5, 0 ) ) * glm::scale( glm::vec3( 0.5 ) ), hudShad, frameBuffer->colorTexture );
@@ -363,6 +371,8 @@ void GraphicsHandle::init()
 	skybox = addRenderable( cubeGeo, glm::scale( glm::vec3( 10 ) ), skyBoxShad, nullptr, cubeMapSimple );
 	environmentTarget = addRenderable( potGeo, glm::translate( glm::vec3( -1, 0, 2 ) )*glm::rotate( -90.0f, glm::vec3( 1,0,0 ) )*glm::scale( glm::vec3( 0.25f ) ), environmentMapper, nullptr, cubeMapSimple );
 	
+	sun = addRenderable( sphereGeo, glm::mat4(), passShad, sunText );
+
 	lightCamera = Camera( float(width())/height(), 0.01, 20 );
 	lightCamera.setFrom( lightPos );
 	lightCamera.setTo( glm::vec3(-1,0,0) );
@@ -393,8 +403,11 @@ void GraphicsHandle::init()
 	DebugMenus::toggleBool( "Use Fancy Environment Map", useFancyEnvironment, "Environment Map" );
 
 	DebugMenus::toggleBool( "Show Shadows for Planet", showEighthLab, "Shadow" );
-	DebugMenus::slideVector( "Light Position", lightPos, -5, 5, "Shadow" );
+	//DebugMenus::slideVector( "Light Position", lightPos, -5, 5, "Shadow" );
 	DebugMenus::toggleBool( "Use light camera", useLightCamera, "Shadow" );
+
+	DebugMenus::toggleBool( "Show Cool Lab", showCoolLab, "Cool Lab" );
+	DebugMenus::slideFloat( "Orbit Rate", orbitRate, 0, 3.5f, "Cool Lab" );
 
 	DebugMenus::toggleBool( "Show Color+Depth", showSeventhLab, "Frame Buffers" );
 
@@ -459,11 +472,14 @@ void GraphicsHandle::paint()
 		paintInner();
 		resetRenderTarget();
 
-		perlinShow->howShader = perlinShadWithShadow;
 
 		camera.from = fro;
 		camera.to = toe;
 		camera.calcModelViewProjection();
+	}
+	else
+	{
+		perlinShow->howShader = perlinShad;
 	}
 	glViewport( 0, 0, width(), height() );
 	if( useLightCamera )
@@ -506,6 +522,11 @@ void GraphicsHandle::paintInner()
 	camera.setAspect( float(width())/height() );
 	glClearColor( 0.5, 0.1, 0.1, 0 );
 	glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
+
+	if( showCoolLab )
+	{
+		goOnSurface = true;
+	}
 
 	setUniformParameter( "diffpos", PT_VEC4, (float*)&glm::vec4(lightPos,1) );
 
@@ -562,7 +583,7 @@ void GraphicsHandle::paintInner()
 		useAmbientF = (useAmbient) ? 1 : 0;
 	}
 
-	if( showSixthLab || showEighthLab )
+	if( showSixthLab || showEighthLab || showCoolLab )
 	{
 		static float prevFreq, prevLac, prevSeed, prevZ, prevPers;
 		static int prevOct;
@@ -659,6 +680,11 @@ void GraphicsHandle::paintInner()
 		skybox->draw();
 		environmentTarget->draw();
 	}
+	if( showCoolLab )
+	{
+		sun->where = glm::translate( lightPos ) * glm::scale( glm::vec3( 0.5f ) );
+		sun->draw();
+	}
 }
 
 glm::vec2 mousePosition = glm::vec2();
@@ -721,6 +747,19 @@ void GraphicsHandle::update( float dt )
 
 	fps = 1/dt;
 	delta = dt;
+
+	if( showCoolLab )
+	{
+		currentRot += orbitRate * dt;
+		lightPos = camera.from + glm::vec3( sin( currentRot )*9, 0, cos(currentRot)*9 );
+		lightCamera.from = lightPos;
+		starrySky->howShader = litStarrySky;
+	}
+	else
+	{
+		starrySky->howShader = starShad;
+	}
+
 	if( QApplication::activeWindow() != 0 )
 	{
 		static glm::vec2 mousePosition = glm::vec2();
@@ -744,9 +783,10 @@ void GraphicsHandle::update( float dt )
 		cam->setTo( cam->getTo() + worldMove);
 		cam->setFrom( cam->getFrom() + worldMove);
 
-		lightPos = lightCamera.from;
+		
 	}
 	
+	lightPos = lightCamera.from;
 
 	camera.calcModelViewProjection();
 

@@ -8,7 +8,10 @@ layout(location = 3) in vec2 in_uv;
 uniform mat4 world;
 uniform mat4 mvp;
 
+out vec2 vUv;
+
 void main()
 {
 	gl_Position = mvp*world*in_position;
+	vUv = in_uv;
 }

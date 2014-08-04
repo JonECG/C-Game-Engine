@@ -40,17 +40,17 @@ void main()
 		color = transparency;// * 0.5f;
 	}
 	
-	if( useLighting != 0 )
-	{
-		vec3 normalized = normalize( vNormal );
+	// if( useLighting != 0 )
+	// {
+		// vec3 normalized = normalize( vNormal );
 		
-		vec3 eyeVector = normalize( vec3( eye-vPosition ) );
-		vec3 lightVector = normalize( vec3( diffpos - vPosition ) );
+		// vec3 eyeVector = normalize( vec3( eye-vPosition ) );
+		// vec3 lightVector = normalize( vec3( diffpos - vPosition ) );
 		
 		//vec4 diffuse = difflight * clamp( dot( lightVector, normalized ), 0, 1 ) ;
-		vec4 spec = specColor * pow( clamp( dot( - reflect( lightVector, vec3( normalized ) ), eyeVector ), 0, 1 ), tightness );
+		// vec4 spec = specColor * pow( clamp( dot( - reflect( lightVector, vec3( normalized ) ), eyeVector ), 0, 1 ), tightness );
 
-		color = color + spec;
-	}
+		// color = color + spec;
+	// }
 	color.w = 1;
 }
