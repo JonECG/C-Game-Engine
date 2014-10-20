@@ -16,3 +16,9 @@ C:\Users\Jon\Desktop\NewCPPWorkingRepo\ModelOBJtoBinary\ModelOBJtoBinary\obj\Deb
 C:\Users\Jon\Desktop\NewCPPWorkingRepo\ModelOBJtoBinary\ModelOBJtoBinary\bin\Debug\ModelOBJtoBinary.exe
 C:\Users\Jon\Desktop\NewCPPWorkingRepo\ModelOBJtoBinary\ModelOBJtoBinary\bin\Debug\ModelOBJtoBinary.pdb
 C:\Users\Jon\Desktop\NewCPPWorkingRepo\ModelOBJtoBinary\ModelOBJtoBinary\obj\Debug\ModelOBJtoBinary.csprojResolveAssemblyReference.cache
+D:\Repositories\NewCPPWorkingRepo\ModelOBJtoBinary\ModelOBJtoBinary\bin\Debug\ModelOBJtoBinary.exe.config
+D:\Repositories\NewCPPWorkingRepo\ModelOBJtoBinary\ModelOBJtoBinary\obj\Debug\ModelOBJtoBinary.exe
+D:\Repositories\NewCPPWorkingRepo\ModelOBJtoBinary\ModelOBJtoBinary\obj\Debug\ModelOBJtoBinary.pdb
+D:\Repositories\NewCPPWorkingRepo\ModelOBJtoBinary\ModelOBJtoBinary\bin\Debug\ModelOBJtoBinary.exe
+D:\Repositories\NewCPPWorkingRepo\ModelOBJtoBinary\ModelOBJtoBinary\bin\Debug\ModelOBJtoBinary.pdb
+D:\Repositories\NewCPPWorkingRepo\ModelOBJtoBinary\ModelOBJtoBinary\obj\Debug\ModelOBJtoBinary.csprojResolveAssemblyReference.cache

@@ -35,6 +35,11 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GAT350Graphics", "GAT350Gra
 		{62F2FD77-859F-4C9F-8344-AC308023B1D6} = {62F2FD77-859F-4C9F-8344-AC308023B1D6}
 	EndProjectSection
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GAT380Game", "GAT380Game\GAT380Game.vcxproj", "{505CDFFE-3D97-4792-A6B5-0C70CD55E11B}"
+	ProjectSection(ProjectDependencies) = postProject
+		{62F2FD77-859F-4C9F-8344-AC308023B1D6} = {62F2FD77-859F-4C9F-8344-AC308023B1D6}
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -73,6 +78,10 @@ Global
 		{20E56788-884B-4B8F-99C1-817F5AF91563}.Debug|Win32.Build.0 = Debug|Win32
 		{20E56788-884B-4B8F-99C1-817F5AF91563}.Release|Win32.ActiveCfg = Release|Win32
 		{20E56788-884B-4B8F-99C1-817F5AF91563}.Release|Win32.Build.0 = Release|Win32
+		{505CDFFE-3D97-4792-A6B5-0C70CD55E11B}.Debug|Win32.ActiveCfg = Debug|Win32
+		{505CDFFE-3D97-4792-A6B5-0C70CD55E11B}.Debug|Win32.Build.0 = Debug|Win32
+		{505CDFFE-3D97-4792-A6B5-0C70CD55E11B}.Release|Win32.ActiveCfg = Release|Win32
+		{505CDFFE-3D97-4792-A6B5-0C70CD55E11B}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

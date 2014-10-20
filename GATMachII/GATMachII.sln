@@ -1,0 +1,62 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GAT380Game", "GAT380Game\GAT380Game.vcxproj", "{5478C796-F2A9-4AD0-B5F3-2AAE28711F60}"
+	ProjectSection(ProjectDependencies) = postProject
+		{C5D68B02-0BF0-4527-9F54-CCC4E552A943} = {C5D68B02-0BF0-4527-9F54-CCC4E552A943}
+		{A6E86803-8626-4768-A145-B9423C05D74D} = {A6E86803-8626-4768-A145-B9423C05D74D}
+		{5EA4647E-0606-4DAB-AB94-94302D2FAA18} = {5EA4647E-0606-4DAB-AB94-94302D2FAA18}
+		{F41914D8-AE90-4136-8498-26D3F81B8B86} = {F41914D8-AE90-4136-8498-26D3F81B8B86}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ClubHubCore", "..\ClubHubCore\ClubHubCore\ClubHubCore.vcxproj", "{A6E86803-8626-4768-A145-B9423C05D74D}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ClubHubGui", "..\ClubHubCore\ClubHubGui\ClubHubGui.vcxproj", "{5EA4647E-0606-4DAB-AB94-94302D2FAA18}"
+	ProjectSection(ProjectDependencies) = postProject
+		{A6E86803-8626-4768-A145-B9423C05D74D} = {A6E86803-8626-4768-A145-B9423C05D74D}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ClubHubSock", "..\ClubHubCore\ClubHubSock\ClubHubSock.vcxproj", "{F41914D8-AE90-4136-8498-26D3F81B8B86}"
+	ProjectSection(ProjectDependencies) = postProject
+		{A6E86803-8626-4768-A145-B9423C05D74D} = {A6E86803-8626-4768-A145-B9423C05D74D}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ClubHubComponent", "..\ClubHubCore\ClubHubComponent\ClubHubComponent.vcxproj", "{C5D68B02-0BF0-4527-9F54-CCC4E552A943}"
+	ProjectSection(ProjectDependencies) = postProject
+		{A6E86803-8626-4768-A145-B9423C05D74D} = {A6E86803-8626-4768-A145-B9423C05D74D}
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{5478C796-F2A9-4AD0-B5F3-2AAE28711F60}.Debug|Win32.ActiveCfg = Debug|Win32
+		{5478C796-F2A9-4AD0-B5F3-2AAE28711F60}.Debug|Win32.Build.0 = Debug|Win32
+		{5478C796-F2A9-4AD0-B5F3-2AAE28711F60}.Release|Win32.ActiveCfg = Release|Win32
+		{5478C796-F2A9-4AD0-B5F3-2AAE28711F60}.Release|Win32.Build.0 = Release|Win32
+		{A6E86803-8626-4768-A145-B9423C05D74D}.Debug|Win32.ActiveCfg = Debug|Win32
+		{A6E86803-8626-4768-A145-B9423C05D74D}.Debug|Win32.Build.0 = Debug|Win32
+		{A6E86803-8626-4768-A145-B9423C05D74D}.Release|Win32.ActiveCfg = Release|Win32
+		{A6E86803-8626-4768-A145-B9423C05D74D}.Release|Win32.Build.0 = Release|Win32
+		{5EA4647E-0606-4DAB-AB94-94302D2FAA18}.Debug|Win32.ActiveCfg = Debug|Win32
+		{5EA4647E-0606-4DAB-AB94-94302D2FAA18}.Debug|Win32.Build.0 = Debug|Win32
+		{5EA4647E-0606-4DAB-AB94-94302D2FAA18}.Release|Win32.ActiveCfg = Release|Win32
+		{5EA4647E-0606-4DAB-AB94-94302D2FAA18}.Release|Win32.Build.0 = Release|Win32
+		{F41914D8-AE90-4136-8498-26D3F81B8B86}.Debug|Win32.ActiveCfg = Debug|Win32
+		{F41914D8-AE90-4136-8498-26D3F81B8B86}.Debug|Win32.Build.0 = Debug|Win32
+		{F41914D8-AE90-4136-8498-26D3F81B8B86}.Release|Win32.ActiveCfg = Release|Win32
+		{F41914D8-AE90-4136-8498-26D3F81B8B86}.Release|Win32.Build.0 = Release|Win32
+		{C5D68B02-0BF0-4527-9F54-CCC4E552A943}.Debug|Win32.ActiveCfg = Debug|Win32
+		{C5D68B02-0BF0-4527-9F54-CCC4E552A943}.Debug|Win32.Build.0 = Debug|Win32
+		{C5D68B02-0BF0-4527-9F54-CCC4E552A943}.Release|Win32.ActiveCfg = Release|Win32
+		{C5D68B02-0BF0-4527-9F54-CCC4E552A943}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(Performance) = preSolution
+		HasPerformanceSessions = true
+	EndGlobalSection
+EndGlobal
