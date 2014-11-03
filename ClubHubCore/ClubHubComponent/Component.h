@@ -10,6 +10,7 @@ protected:
 	Entity * parent;
 public:
 	Component();
+	Entity * getParent();
 	virtual ~Component();
 	virtual int getId();
 	virtual void init();

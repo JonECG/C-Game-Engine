@@ -1,7 +1,7 @@
 #include "Label.h"
 
 #include "glm\glm.hpp"
-#include "Graphics.h"
+#include "Window\Graphics.h"
 
 Label::Label( const glm::vec2& position, const glm::vec2& dimensions, const char* text ) : UIElement( position, dimensions )
 {

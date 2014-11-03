@@ -1,9 +1,9 @@
 #include "UIElement.h"
 #include "glm\glm.hpp"
 #include "List.h"
-#include "Graphics.h"
-#include "UserController.h"
-#include "CoordinateTransform.h"
+#include "Window\Graphics.h"
+#include "Window\UserController.h"
+#include "Window\CoordinateTransform.h"
 
 UIElement::UIElement( const glm::vec2& position, const glm::vec2& dimensions )
 {

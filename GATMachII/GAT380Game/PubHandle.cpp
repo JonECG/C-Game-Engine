@@ -1,13 +1,13 @@
 #include "PubHandle.h"
 
-#include "Shader.h"
-#include "ContentManager.h"
-#include "Graphics.h"
-#include "Font.h"
-#include "Character.h"
+#include "Renderer\Shader.h"
+#include "Window\ContentManager.h"
+#include "Window\Graphics.h"
+#include "Window\Font.h"
+#include "Window\Character.h"
 
-#include "UserController.h"
-#include "CoordinateTransform.h"
+#include "Window\UserController.h"
+#include "Window\CoordinateTransform.h"
 
 #include "glm\glm.hpp"
 #include "ShapeGenerator.h"
@@ -15,15 +15,8 @@
 #include "Game.h"
 #include "Stage.h"
 #include "Entity.h"
-#include "TransformComponent.h"
-#include "CameraComponent.h"
-#include "RenderComponent.h"
-#include "ColliderComponent.h"
-#include "InputMoveComponent.h"
-#include "FollowCamComponent.h"
-#include "PhysicsComponent.h"
-#include "ForceGenerator.h"
-#include "PlaneComponent.h"
+
+#include "LevelControllerComponent.h"
 
 Texture *cow;
 Font *font;
@@ -33,20 +26,13 @@ glm::vec3 lightPos = glm::vec3( 1, 2, 10 );
 glm::vec4 difLight = glm::vec4(1.0f,1.0f,1.0f,1), colInfluence = glm::vec4(0.8f,0.8f,0.8f,1), specColor = glm::vec4(0.8f,0.8f,0.8f,1);
 float specAmount = 10;
 
-Entity * makeAThing()
-{
-	Entity * ent = new Entity();
-	ent->addComponent( new TransformComponent() );
-	ent->addComponent( new RenderComponent() );
-	ent->addComponent( new ColliderComponent() );
-	ent->getComponent<ColliderComponent>()->setAsBox( glm::vec3( 1, 1, 1 ) );
-	//ent->addComponent( new PhysicsComponent() );
-	return ent;
-}
 
-void PubHandle::init( ContentManager* content, CoordinateTransform *transform )
+
+void PubHandle::init( ContentManager* content, CoordinateTransform *transform, Graphics * graphics )
 {
 	transform->setCoordinateSystem( CoordinateSystem::OPENGL_COORDINATES );
+
+	graphics->showFullscreen();
 
 	cow = content->loadTexture( "Resources/cow.png" );
 	font = content->loadFont( "Resources/Tahoma.bfnt" );
@@ -54,41 +40,23 @@ void PubHandle::init( ContentManager* content, CoordinateTransform *transform )
 
 	game = new Game();
 	game->subscribeContentManager( content );
-
+	game->subscribeGraphicsHandle( graphics );
+	
 	Stage * stage = new Stage();
 	game->setStage( stage );
 
 	Geometry * planeGeo = content->loadGeometry( "Resources/biplane.mod" );
 	Geometry * cubeGeo = ShapeGenerator::createCube( content );
 
-	Entity * cam = new Entity();
-	cam->addComponent( new TransformComponent() );
-	cam->addComponent( new CameraComponent() );
-	cam->addComponent( new FollowCamComponent() );
-	cam->gc<TransformComponent>()->setTranslation( glm::vec3( -5, 0, 0 ) );
-	stage->addEntity(cam);
+	Entity * controller = new Entity();
+	LevelControllerComponent * cont = new LevelControllerComponent();
+	cont->friendlyPlane = planeGeo->makeRenderable( passShad, content->loadTexture( "Resources/planeTex.png" ) );
+	cont->enemyPlane = planeGeo->makeRenderable( passShad, content->loadTexture( "Resources/planeTex.png" ) );
+	cont->bullet = content->loadGeometry( "Resources/shovel.mod" )->makeRenderable(passShad,content->loadTexture( "Resources/ShovelTexture.png" ));
+	cont->ground = cubeGeo->makeRenderable( passShad, content->loadTexture( "Resources/brickyDiffuse.png" ) );
 
-	Entity * thing = makeAThing();
-	thing->addComponent( new InputMoveComponent() );
-	thing->addComponent( new PlaneComponent() );
-	thing->gc<PlaneComponent>()->bullet = content->loadGeometry( "Resources/shovel.mod" )->makeRenderable(passShad,cow);
-	thing->getComponent<TransformComponent>()->setTranslation( glm::vec3( 0, 20, 0 ) );
-	thing->gc<RenderComponent>()->setRenderable( planeGeo->makeRenderable(passShad, cow) );
-	stage->addEntity(thing);
-
-	cam->gc<FollowCamComponent>()->target = thing;
-	cam->gc<FollowCamComponent>()->laxness = 20;
-	cam->gc<FollowCamComponent>()->desiredOffset = glm::vec3( 0, 5, 100 );
-
-	for( int i = 0; i <= 100; i++ )
-	{
-		thing = makeAThing();
-		thing->gc<ColliderComponent>()->setAsBox( glm::vec3( 5, 5, 5 ) );
-		thing->gc<TransformComponent>()->setScale( glm::vec3( 5, 5, 5 ) );
-		thing->gc<RenderComponent>()->setRenderable( cubeGeo->makeRenderable(passShad, cow) );
-		stage->addEntity(thing);
-		thing->getComponent<TransformComponent>()->setTranslation( glm::vec3( 10*(i-50), 0, 0 ) );
-	}
+	controller->addComponent( cont );
+	stage->addEntity( controller );
 	
 	glm::vec4 amb = glm::vec4(0.1f,0.1f,0.1f,1);
 	Shader::setGlobalUniformParameter( "amblight", PT_VEC4, &amb );//set

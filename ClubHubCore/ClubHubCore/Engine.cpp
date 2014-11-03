@@ -1,11 +1,11 @@
 #include "Engine.h"
 
-#include "ManagedAppHandle.h"
+#include "Window\ManagedAppHandle.h"
 #include <QtGui\qapplication.h>
-#include "ManagedGLWidget.h"
+#include "Window\ManagedGLWidget.h"
 #include <QtGui\qlayout.h>
-#include "ContentManager.h"
-#include "Graphics.h"
+#include "Window\ContentManager.h"
+#include "Window\Graphics.h"
 
 namespace Engine
 {
@@ -43,13 +43,19 @@ namespace Engine
 		QHBoxLayout *mainLayout = new QHBoxLayout();
 		base->setLayout( mainLayout );
 
+		base->setContentsMargins( 0,0,0,0 );
+		mainLayout->setSpacing(0);
+		mainLayout->setContentsMargins(0,0,0,0);
+
 		ManagedGLWidget *widg = new ManagedGLWidget();
 		widg->setHandle( handle );
+
+		widg->setContentsMargins(0,0,0,0);
 
 		mainLayout->addWidget( widg, 100 );
 
 
-		base->show();
+		base->show();//FullScreen();
 		base->resize( 640, 640 );
 
 		app->exec();

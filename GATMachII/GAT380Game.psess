@@ -92,6 +92,9 @@
     <Report>
       <Path>GAT380Game141010.vspx</Path>
     </Report>
+    <Report>
+      <Path>GAT380Game141028.vspx</Path>
+    </Report>
   </Reports>
   <Launches>
     <ProjBinary>

@@ -5,6 +5,7 @@ static const int MAX_COMPONENTS = 10;
 
 Entity::Entity()
 {
+	inited = false;
 	components = new JankHashMap< int, Component * >;//( MAX_COMPONENTS );
 }
 Entity::~Entity()

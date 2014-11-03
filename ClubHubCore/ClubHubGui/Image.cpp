@@ -1,7 +1,7 @@
 #include "Image.h"
 
-#include "Texture.h"
-#include "Graphics.h"
+#include "Renderer\Texture.h"
+#include "Window\Graphics.h"
 #include <glm\glm.hpp>
 
 Image::Image( const glm::vec2& position, const glm::vec2& dimensions, const Texture& text ) : UIElement( position, dimensions )

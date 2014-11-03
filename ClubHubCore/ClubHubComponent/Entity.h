@@ -14,6 +14,7 @@ class EXPORT Entity
 	JankHashMap< int, Component* > * components;
 
 	friend class Stage;
+	bool inited;
 	Stage * stage;
 public:
 	Entity();
@@ -31,6 +32,9 @@ public:
 
 	template<class ComponentType>
 		inline ComponentType* getComponent();
+
+	template<class ComponentType>
+		inline bool hasComponent();
 
 	template<class ComponentType>
 		inline ComponentType* removeComponent();
@@ -73,6 +77,15 @@ ComponentType* Entity::getComponent()
         return nullptr;
     }
 }
+
+template<typename ComponentType>
+bool Entity::hasComponent()
+{
+	auto pos = hsh(typeid(ComponentType).name());
+
+	return components->has( pos );
+}
+
 template<typename ComponentType>
 ComponentType* Entity::removeComponent()
 {

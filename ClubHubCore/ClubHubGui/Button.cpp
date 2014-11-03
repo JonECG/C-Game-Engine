@@ -1,14 +1,14 @@
 #include "Button.h"
 
 #include <glm\glm.hpp>
-#include "Graphics.h"
+#include "Window\Graphics.h"
 #include <functional>
-#include "UserController.h"
+#include "Window\UserController.h"
 #include "glm\glm.hpp"
 
 #include "Label.h"
 #include "Panel.h"
-#include "CoordinateTransform.h"
+#include "Window\CoordinateTransform.h"
 
 Button::Button( const glm::vec2& position, const glm::vec2& dimensions, const char* title ) : UIElement( position, dimensions )
 {

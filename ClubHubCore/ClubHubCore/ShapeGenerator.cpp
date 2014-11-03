@@ -1,7 +1,7 @@
 #include "ShapeGenerator.h"
-#include "Geometry.h"
-#include "ContentManager.h"
-#include "Vertex.h"
+#include "Renderer\Geometry.h"
+#include "Window\ContentManager.h"
+#include "Renderer\Vertex.h"
 #include "GL\glew.h"
 
 

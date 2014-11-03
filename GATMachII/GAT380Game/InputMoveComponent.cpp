@@ -1,10 +1,10 @@
 #include "InputMoveComponent.h"
 #include "Entity.h"
-#include "TransformComponent.h"
-#include "UserController.h"
+#include "Components\TransformComponent.h"
+#include "Window\UserController.h"
 #include "Stage.h"
 #include "Game.h"
-#include "PhysicsComponent.h"
+#include "Physics\PhysicsComponent.h"
 #include "PlaneComponent.h"
 #include <Windows.h>
 
@@ -17,8 +17,8 @@ void InputMoveComponent::update( float dt )
 	auto plane = parent->getComponent<PlaneComponent>();
 	auto uc = parent->getStage()->getGame()->getUserController();
 
-	plane->dir -= (uc->isKeyDown('D')?1:0) * 100 * dt;
-	plane->dir += (uc->isKeyDown('A')?1:0) * 100 * dt;
+	plane->dir -= (uc->isKeyDown('D')?1:0) * 150 * dt;
+	plane->dir += (uc->isKeyDown('A')?1:0) * 150 * dt;
 
 	plane->speed += (uc->isKeyDown('W')?1:0) * 10 * dt;
 	plane->speed -= (uc->isKeyDown('S')?1:0) * 10 * dt;

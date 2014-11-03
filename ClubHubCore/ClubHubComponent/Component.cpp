@@ -25,6 +25,11 @@ Component::~Component()
 {
 }
 
+Entity * Component::getParent()
+{
+	return this->parent;
+}
+
 int Component::getId()
 {
 	if( id == 0 )

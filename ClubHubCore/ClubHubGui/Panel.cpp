@@ -1,7 +1,7 @@
 #include "Panel.h"
 
 #include "glm\glm.hpp"
-#include "Graphics.h"
+#include "Window\Graphics.h"
 
 Panel::Panel( const glm::vec2& position, const glm::vec2& dimensions, const glm::vec4& color ) : UIElement( position, dimensions )
 {

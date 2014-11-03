@@ -26,6 +26,7 @@ public:
 	void addEntity( Entity * entity );
 	bool hasEntity( Entity * entity );
 	void deleteEntity( Entity * entity );
+	void clear();
 	void update( float dt );
 	void subscribeRender( CameraComponent* camera );
 	void draw();

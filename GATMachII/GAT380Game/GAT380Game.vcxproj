@@ -11,15 +11,23 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="AIPilotComponent.cpp" />
+    <ClCompile Include="BulletComponent.cpp" />
     <ClCompile Include="FollowCamComponent.cpp" />
+    <ClCompile Include="GroundComponent.cpp" />
     <ClCompile Include="InputMoveComponent.cpp" />
+    <ClCompile Include="LevelControllerComponent.cpp" />
     <ClCompile Include="PlaneComponent.cpp" />
     <ClCompile Include="PubDriver.cpp" />
     <ClCompile Include="PubHandle.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="AIPilotComponent.h" />
+    <ClInclude Include="BulletComponent.h" />
     <ClInclude Include="FollowCamComponent.h" />
+    <ClInclude Include="GroundComponent.h" />
     <ClInclude Include="InputMoveComponent.h" />
+    <ClInclude Include="LevelControllerComponent.h" />
     <ClInclude Include="PlaneComponent.h" />
     <ClInclude Include="PubHandle.h" />
   </ItemGroup>
