@@ -3,6 +3,8 @@
 
 Game::Game()
 {
+	graphics = nullptr;
+	stage = nullptr;
 }
 Game::~Game()
 {
