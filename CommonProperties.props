@@ -21,7 +21,6 @@
       <Command>IF EXIST "$(SolutionDir)RunDlls\*.dll" xcopy /Y "$(SolutionDir)RunDlls\*.dll" "$(SolutionDir)$(TempDirectory)$(Configuration)\Bin\"
 
 IF NOT EXIST "$(SolutionDir)$(TempDirectory)$(Configuration)\Lib\" mkdir "$(SolutionDir)$(TempDirectory)$(Configuration)\Lib\"
-IF EXIST "$(SolutionDir)$(TempDirectory)$(Configuration)\Intermediates\*.lib" move /Y "$(SolutionDir)$(TempDirectory)$(Configuration)\Intermediates\*.lib" "$(SolutionDir)$(TempDirectory)$(Configuration)\Lib\"
 IF EXIST "$(SolutionDir)$(TempDirectory)$(Configuration)\Bin\*.lib" move /Y "$(SolutionDir)$(TempDirectory)$(Configuration)\Bin\*.lib" "$(SolutionDir)$(TempDirectory)$(Configuration)\Lib\"
 
 IF EXIST "$(SolutionDir)$(TempDirectory)$(Configuration)\Bin\*.exe" xcopy /Y "$(SolutionDir)$(TempDirectory)$(Configuration)\Bin\*.exe" "$(SolutionDir)$(TempDirectory)$(Configuration)\Game\"

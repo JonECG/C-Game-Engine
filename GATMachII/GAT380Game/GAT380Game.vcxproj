@@ -75,24 +75,53 @@
       <AdditionalLibraryDirectories>$(SolutionDir)..\ext\LibOVR\Lib\;$(SolutionDir)$(TempDirectory)$(Configuration)\Lib\</AdditionalLibraryDirectories>
     </Link>
     <PreLinkEvent>
-      <Command>IF EXIST "$(ProjectDir)Resources\*" xcopy /Y /s /i "$(ProjectDir)Resources\*" "$(SolutionDir)$(TempDirectory)$(Configuration)\Bin\Resources"
-IF EXIST "$(ProjectDir)Resources\*" xcopy /Y /s /i "$(ProjectDir)Resources\*" "$(SolutionDir)$(TempDirectory)$(Configuration)\Game\Resources"</Command>
+      <Command>
+      </Command>
     </PreLinkEvent>
+    <PostBuildEvent>
+      <Command>IF EXIST "$(SolutionDir)RunDlls\*.dll" xcopy /Y "$(SolutionDir)RunDlls\*.dll" "$(SolutionDir)$(TempDirectory)$(Configuration)\Bin\"
+
+IF NOT EXIST "$(SolutionDir)$(TempDirectory)$(Configuration)\Lib\" mkdir "$(SolutionDir)$(TempDirectory)$(Configuration)\Lib\"
+IF EXIST "$(SolutionDir)$(TempDirectory)$(Configuration)\Bin\*.lib" move /Y "$(SolutionDir)$(TempDirectory)$(Configuration)\Bin\*.lib" "$(SolutionDir)$(TempDirectory)$(Configuration)\Lib\"
+
+IF EXIST "$(SolutionDir)$(TempDirectory)$(Configuration)\Bin\*.exe" xcopy /Y "$(SolutionDir)$(TempDirectory)$(Configuration)\Bin\*.exe" "$(SolutionDir)$(TempDirectory)$(Configuration)\Game\"
+IF EXIST "$(SolutionDir)$(TempDirectory)$(Configuration)\Bin\*.dll" xcopy /Y "$(SolutionDir)$(TempDirectory)$(Configuration)\Bin\*.dll" "$(SolutionDir)$(TempDirectory)$(Configuration)\Game\"
+
+IF EXIST "$(ProjectDir)Resources\*" xcopy /Y /s /i "$(ProjectDir)Resources\*" "$(SolutionDir)$(TempDirectory)$(Configuration)\Bin\Resources"
+IF EXIST "$(ProjectDir)Resources\*" xcopy /Y /s /i "$(ProjectDir)Resources\*" "$(SolutionDir)$(TempDirectory)$(Configuration)\Game\Resources"</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <AdditionalIncludeDirectories>$(ProjectDir)\;$(SolutionDir)..\ext\glm\;$(SolutionDir)..\ClubHubCore\ClubHubGui\;$(SolutionDir)..\ClubHubCore\ClubHubCore\;$(SolutionDir)..\ClubHubCore\ClubHubSock\;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)\;$(SolutionDir)..\ext\glm\;$(SolutionDir)..\ClubHubCore\ClubHubGui\;$(SolutionDir)..\ClubHubCore\ClubHubCore\;$(SolutionDir)..\ClubHubCore\ClubHubSock\;$(SolutionDir)..\ClubHubCore\ClubHubComponent\;</AdditionalIncludeDirectories>
       <DisableSpecificWarnings>4201;4127;4251;%(DisableSpecificWarnings)</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>ClubHubSock.lib;ClubHubGui.lib;ClubHubCore.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>ClubHubComponent.lib;ClubHubSock.lib;ClubHubGui.lib;ClubHubCore.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)..\ext\LibOVR\Lib\;$(SolutionDir)$(TempDirectory)$(Configuration)\Lib\</AdditionalLibraryDirectories>
     </Link>
+    <PreLinkEvent>
+      <Command>
+      </Command>
+    </PreLinkEvent>
+    <PostBuildEvent>
+      <Command>IF EXIST "$(SolutionDir)RunDlls\*.dll" xcopy /Y "$(SolutionDir)RunDlls\*.dll" "$(SolutionDir)$(TempDirectory)$(Configuration)\Bin\"
+
+IF NOT EXIST "$(SolutionDir)$(TempDirectory)$(Configuration)\Lib\" mkdir "$(SolutionDir)$(TempDirectory)$(Configuration)\Lib\"
+IF EXIST "$(SolutionDir)$(TempDirectory)$(Configuration)\Bin\*.lib" move /Y "$(SolutionDir)$(TempDirectory)$(Configuration)\Bin\*.lib" "$(SolutionDir)$(TempDirectory)$(Configuration)\Lib\"
+
+IF EXIST "$(SolutionDir)$(TempDirectory)$(Configuration)\Bin\*.exe" xcopy /Y "$(SolutionDir)$(TempDirectory)$(Configuration)\Bin\*.exe" "$(SolutionDir)$(TempDirectory)$(Configuration)\Game\"
+IF EXIST "$(SolutionDir)$(TempDirectory)$(Configuration)\Bin\*.dll" xcopy /Y "$(SolutionDir)$(TempDirectory)$(Configuration)\Bin\*.dll" "$(SolutionDir)$(TempDirectory)$(Configuration)\Game\"
+
+IF EXIST "$(ProjectDir)Resources\*" xcopy /Y /s /i "$(ProjectDir)Resources\*" "$(SolutionDir)$(TempDirectory)$(Configuration)\Bin\Resources"
+IF EXIST "$(ProjectDir)Resources\*" xcopy /Y /s /i "$(ProjectDir)Resources\*" "$(SolutionDir)$(TempDirectory)$(Configuration)\Game\Resources"</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
