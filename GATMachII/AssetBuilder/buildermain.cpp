@@ -28,7 +28,7 @@ std::vector< FileHeld > getAllFilesInDirectory( std::string directory )
 			char* nPtr = new char [lstrlen( data.cFileName ) + 1];
 			for( int i = 0; i < lstrlen( data.cFileName ); i++ )
 				nPtr[i] = char( data.cFileName[i] );
-			nPtr[ lstrlen( data.cFileName ) - 1 ] = '\0';
+			nPtr[ lstrlen( data.cFileName ) ] = '\0';
 
 			std::string full( nPtr );
 
@@ -57,31 +57,54 @@ bool needsReplace( std::string sourceFile, std::string destinationFile )
 	bool result = true;
 
 	struct stat destFileStat;
-	if( stat(destinationFile.c_str(), &destFileStat) != 0 )
+	if( stat(destinationFile.c_str(), &destFileStat) == 0 )
 	{
 		struct stat sourceFileStat;
 		stat(sourceFile.c_str(), &sourceFileStat);
 		result = sourceFileStat.st_mtime > destFileStat.st_mtime;
 	} 
 
-	return result;
+	return true;//result;
+}
+
+void stringReplaceAll( std::string * source, std::string search, std::string replace )
+{
+	std::string::size_type n = 0;
+	while ( ( n = source->find( search, n ) ) != std::string::npos )
+	{
+		source->replace( n, search.size(), replace );
+		n += replace.size();
+	}
 }
 
 int main( int argc, char * argv[] )
 {
+	//TEST
+	argc = 4;
+	char * what[] = {	"D:/Repositories/NewCPPWorkingRepo/GATMachII/AssetBuilder/AssetBuilder.exe",
+						"D:/Repositories/NewCPPWorkingRepo/GATMachII/Assets/ ",
+						"D:/Repositories/NewCPPWorkingRepo/GATMachII/Temp/Debug/Bin/Assets/ ",
+						"D:/Repositories/NewCPPWorkingRepo/GATMachII/../ModelOBJtoBinary/ModelOBJtoBinary/bin/Debug/ModelOBJtoBinary.exe" };
+	argv = what;
+	//ENDTEST
 
+	std::string converted[10];
+
+	//for( int i = 0; i < argc; i++ )
+	//{
+		//converted[i] = std::string( argv[i] );
+		//stringReplaceAll( &converted[i], "\\", "/" );
+		//std::cout << "[" << converted[i] << "]" << std::endl;
+	//}
 	if( argc > 3 )
 	{
 		int updated = 0;
-
 		std::string inputDir( argv[1] );
+		inputDir = inputDir.substr( 0, inputDir.length() - 1  );
 		std::string outputDir( argv[2] );
 		outputDir = outputDir.substr( 0, outputDir.length() - 1  );
 		std::string programLocation( argv[3] );
-		auto var = getAllFilesInDirectory( inputDir.substr( 0, inputDir.length() - 1 ) );
-
-		std::cout << argv[1] << std::endl;
-		std::cout << argv[2] << std::endl;
+		auto var = getAllFilesInDirectory( inputDir );
 		for( unsigned int i = 0; i < var.size(); i++ )
 		{
 			FileHeld held = var.at(i);
@@ -93,13 +116,15 @@ int main( int argc, char * argv[] )
 				{
 					static QImage image;
 					image.load( ( inputDir + held.fileName + "." + held.ext ).c_str() );
-					QGLWidget::convertToGLFormat( image );
+					image = QGLWidget::convertToGLFormat( image );
 
 					static std::ofstream fileWrite;
-					fileWrite.open( outputDir + held.fileName + std::string( ".glt" ) );
+					fileWrite.open( outputDir + held.fileName + std::string( ".glt" ), std::ios::binary | std::ios::out );
 
 					int width = image.width();
 					int height = image.height();
+					fileWrite.write( reinterpret_cast<char *>(&width), sizeof( width ) );
+					fileWrite.write( reinterpret_cast<char *>(&height), sizeof( height ) );
 					fileWrite.write( reinterpret_cast<char *>(image.bits()), width*height*4 );
 
 					fileWrite.close();
@@ -111,7 +136,7 @@ int main( int argc, char * argv[] )
 			{
 				if( needsReplace( inputDir + held.fileName + "." + held.ext, outputDir + held.fileName + ".glmod" ) )
 				{
-					system( ( std::string( "\"" + programLocation + "\" \"" + inputDir + held.fileName + "." + held.ext + "\" \"" + outputDir + held.fileName + ".glmod\"" ) ).c_str() );
+					system( ( std::string( "call \"" + programLocation + "\" \"" + inputDir + held.fileName + "." + held.ext + "\" \"" + outputDir + held.fileName + ".glmod\"" ) ).c_str() );
 					updated++;
 				}
 			}

@@ -59,5 +59,6 @@ public:
 	Font* loadFont( const char* path );
 	Shader* loadShader( const char* vertPath, const char* fragShader );
 	Texture* loadTexture( const char* path );
+	Texture* loadPreppedTexture( const char* path );
 };
 

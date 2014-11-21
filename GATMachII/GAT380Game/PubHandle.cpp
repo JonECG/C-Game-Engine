@@ -34,7 +34,7 @@ void PubHandle::init( ContentManager* content, CoordinateTransform *transform, G
 
 	graphics->showFullscreen();
 
-	cow = content->loadTexture( "Assets/cow.png" );
+	cow = content->loadPreppedTexture( "Assets/cow.glt" );
 	font = content->loadFont( "Assets/Tahoma.bfnt" );
 	Shader * passShad = content->loadShader( "Assets/passThrough.vert", "Assets/passThrough.frag" );
 
@@ -50,10 +50,10 @@ void PubHandle::init( ContentManager* content, CoordinateTransform *transform, G
 
 	Entity * controller = new Entity();
 	LevelControllerComponent * cont = new LevelControllerComponent();
-	cont->friendlyPlane = planeGeo->makeRenderable( passShad, content->loadTexture( "Assets/planeTex.png" ) );
-	cont->enemyPlane = planeGeo->makeRenderable( passShad, content->loadTexture( "Assets/planeTex.png" ) );
-	cont->bullet = content->loadGeometry( "Assets/shovel.mod" )->makeRenderable(passShad,content->loadTexture( "Assets/ShovelTexture.png" ));
-	cont->ground = cubeGeo->makeRenderable( passShad, content->loadTexture( "Assets/brickyDiffuse.png" ) );
+	cont->friendlyPlane = planeGeo->makeRenderable( passShad, content->loadPreppedTexture( "Assets/planeTex.glt" ) );
+	cont->enemyPlane = planeGeo->makeRenderable( passShad, content->loadPreppedTexture( "Assets/planeTex.glt" ) );
+	cont->bullet = content->loadGeometry( "Assets/shovel.mod" )->makeRenderable(passShad,content->loadPreppedTexture( "Assets/ShovelTexture.glt" ));
+	cont->ground = cubeGeo->makeRenderable( passShad, content->loadPreppedTexture( "Assets/brickyDiffuse.glt" ) );
 
 	controller->addComponent( cont );
 	stage->addEntity( controller );

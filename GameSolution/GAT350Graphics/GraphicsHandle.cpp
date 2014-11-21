@@ -256,8 +256,8 @@ void GraphicsHandle::init()
 	showSixthLab = false;
 	showSeventhLab = false;
 	showEighthLab = false;
-	showNinthLab = true;
-	showCoolLab = false;
+	showNinthLab = false;
+	showCoolLab = true;
 
 	specAmount = 100;
 	lightPos = glm::vec3(-1.0f,1.0f,3.0f);

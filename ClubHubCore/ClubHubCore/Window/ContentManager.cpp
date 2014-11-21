@@ -178,8 +178,8 @@ Font* ContentManager::loadFont( const char* path )
 	else
 	{
 		result = fontFromFile( path );
-		std::cout << s.substr(0,s.find_last_of('.')).append( ".png" ).c_str();
-		result->texture = loadTexture( s.substr(0,s.find_last_of('.')).append( "_0.png" ).c_str() );
+		std::cout << s.substr(0,s.find_last_of('.')).append( ".glt" ).c_str();
+		result->texture = loadPreppedTexture( s.substr(0,s.find_last_of('.')).append( "_0.glt" ).c_str() );
 		fonts[s] = result;
 	}
 
@@ -347,6 +347,45 @@ Texture* ContentManager::loadTexture( const char* path )
 	else
 	{
 		result = textureFromFile( path );
+		textures[s] = result;
+	}
+
+	return result;
+}
+
+Texture* ContentManager::loadPreppedTexture( const char* path )
+{
+	Texture* result;
+	std::string s = std::string(path);
+	
+	// check if key is present
+	if (textures.find(s) != textures.end())
+		result = textures[s];
+	else
+	{
+		static std::ifstream file;
+		file.open( path, std::ios::in | std::ios::binary );
+		int width, height;
+		file.read( reinterpret_cast<char*>( &width ), sizeof( width ) );
+		file.read( reinterpret_cast<char*>( &height ), sizeof( height ) );
+		uchar * imageData = new uchar[ width*height*4 ];
+		file.read( reinterpret_cast<char*>( imageData ), width*height*4 );
+
+		file.close();
+		unsigned int texture;
+		glGenTextures( 1, &texture );
+		glBindTexture( GL_TEXTURE_2D, texture );
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, imageData);
+		glTexEnvf(GL_TEXTURE_2D,GL_TEXTURE_ENV_MODE,GL_MODULATE);
+
+		delete imageData;
+	
+		glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
+		glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+
+		result = Texture::nextFreeTexture();
+		result -> textureID = texture;
+
 		textures[s] = result;
 	}
 

@@ -28,7 +28,7 @@ Graphics::Graphics( ContentManager* content, CoordinateTransform *transform, Man
 	drawColor = new glm::vec4(1,1,1,1);
 	this->coordinateTransform = transform;
 
-	white = content->loadTexture( "Assets/white.png" );
+	white = content->loadPreppedTexture( "Assets/white.glt" );
 	defaultFont = content->loadFont( "Assets/Tahoma.bfnt" );
 	currentFont = defaultFont;
 

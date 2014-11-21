@@ -64,6 +64,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <CustomBuildBeforeTargets>
     </CustomBuildBeforeTargets>
+    <CustomBuildAfterTargets>Build</CustomBuildAfterTargets>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" />
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -82,14 +83,17 @@
       </Command>
     </PreLinkEvent>
     <PostBuildEvent />
-    <PreBuildEvent>
-      <Command>IF EXIST "$(SolutionDir)Assets\*" xcopy /Y /s /i "$(SolutionDir)Assets\*" "$(SolutionDir)$(TempDirectory)$(Configuration)\Bin\Assets"
-IF EXIST "$(SolutionDir)Assets\*" xcopy /Y /s /i "$(SolutionDir)Assets\*" "$(SolutionDir)$(TempDirectory)$(Configuration)\Game\Assets"
-call "$(SolutionDir)AssetBuilder\AssetBuilder.exe" "$(SolutionDir)Assets\ " "$(SolutionDir)$(TempDirectory)$(Configuration)\Bin\Assets"
+    <PreBuildEvent />
+    <CustomBuildStep />
+    <CustomBuildStep />
+    <CustomBuildStep>
+      <Command>IF NOT EXIST "$(SolutionDir)$(TempDirectory)$(Configuration)\Bin\Assets\" mkdir "$(SolutionDir)$(TempDirectory)$(Configuration)\Bin\Assets\";
+call "$(SolutionDir)AssetBuilder\AssetBuilder.exe" "$(SolutionDir)Assets\ " "$(SolutionDir)$(TempDirectory)$(Configuration)\Bin\Assets\ " "$(SolutionDir)..\ModelOBJtoBinary\ModelOBJtoBinary\bin\Debug\ModelOBJtoBinary.exe"
 IF EXIST "$(SolutionDir)$(TempDirectory)$(Configuration)\Bin\Assets\*" xcopy /Y /s /i "$(SolutionDir)$(TempDirectory)$(Configuration)\Bin\Assets\*" "$(SolutionDir)$(TempDirectory)$(Configuration)\Game\Assets"</Command>
-    </PreBuildEvent>
-    <CustomBuildStep />
-    <CustomBuildStep />
+    </CustomBuildStep>
+    <CustomBuildStep>
+      <Outputs>afadf</Outputs>
+    </CustomBuildStep>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
