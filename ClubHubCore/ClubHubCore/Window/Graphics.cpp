@@ -28,8 +28,8 @@ Graphics::Graphics( ContentManager* content, CoordinateTransform *transform, Man
 	drawColor = new glm::vec4(1,1,1,1);
 	this->coordinateTransform = transform;
 
-	white = content->loadTexture( "Resources/white.png" );
-	defaultFont = content->loadFont( "Resources/Tahoma.bfnt" );
+	white = content->loadTexture( "Assets/white.png" );
+	defaultFont = content->loadFont( "Assets/Tahoma.bfnt" );
 	currentFont = defaultFont;
 
 	Vertex verts[5];
@@ -57,7 +57,7 @@ Graphics::Graphics( ContentManager* content, CoordinateTransform *transform, Man
 	Vertex::setAttributes( solidRectGeo );
 	Vertex::setAttributes( emptyRectGeo );
 
-	graphicsShader = content->loadShader( "Resources/graphix.vert", "Resources/graphix.frag" );
+	graphicsShader = content->loadShader( "Assets/graphix.vert", "Assets/graphix.frag" );
 
 	graphicsShader->addUniformParameter( "world", ParameterType::PT_MAT4, drawTransform );
 	graphicsShader->addUniformParameter( "color", ParameterType::PT_VEC4, drawColor );

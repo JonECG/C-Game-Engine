@@ -34,9 +34,9 @@ void PubHandle::init( ContentManager* content, CoordinateTransform *transform, G
 
 	graphics->showFullscreen();
 
-	cow = content->loadTexture( "Resources/cow.png" );
-	font = content->loadFont( "Resources/Tahoma.bfnt" );
-	Shader * passShad = content->loadShader( "Resources/passThrough.vert", "Resources/passThrough.frag" );
+	cow = content->loadTexture( "Assets/cow.png" );
+	font = content->loadFont( "Assets/Tahoma.bfnt" );
+	Shader * passShad = content->loadShader( "Assets/passThrough.vert", "Assets/passThrough.frag" );
 
 	game = new Game();
 	game->subscribeContentManager( content );
@@ -45,15 +45,15 @@ void PubHandle::init( ContentManager* content, CoordinateTransform *transform, G
 	Stage * stage = new Stage();
 	game->setStage( stage );
 
-	Geometry * planeGeo = content->loadGeometry( "Resources/biplane.mod" );
+	Geometry * planeGeo = content->loadGeometry( "Assets/biplane.mod" );
 	Geometry * cubeGeo = ShapeGenerator::createCube( content );
 
 	Entity * controller = new Entity();
 	LevelControllerComponent * cont = new LevelControllerComponent();
-	cont->friendlyPlane = planeGeo->makeRenderable( passShad, content->loadTexture( "Resources/planeTex.png" ) );
-	cont->enemyPlane = planeGeo->makeRenderable( passShad, content->loadTexture( "Resources/planeTex.png" ) );
-	cont->bullet = content->loadGeometry( "Resources/shovel.mod" )->makeRenderable(passShad,content->loadTexture( "Resources/ShovelTexture.png" ));
-	cont->ground = cubeGeo->makeRenderable( passShad, content->loadTexture( "Resources/brickyDiffuse.png" ) );
+	cont->friendlyPlane = planeGeo->makeRenderable( passShad, content->loadTexture( "Assets/planeTex.png" ) );
+	cont->enemyPlane = planeGeo->makeRenderable( passShad, content->loadTexture( "Assets/planeTex.png" ) );
+	cont->bullet = content->loadGeometry( "Assets/shovel.mod" )->makeRenderable(passShad,content->loadTexture( "Assets/ShovelTexture.png" ));
+	cont->ground = cubeGeo->makeRenderable( passShad, content->loadTexture( "Assets/brickyDiffuse.png" ) );
 
 	controller->addComponent( cont );
 	stage->addEntity( controller );

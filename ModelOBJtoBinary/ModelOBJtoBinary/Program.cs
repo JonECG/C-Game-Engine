@@ -21,7 +21,7 @@ namespace ModelOBJtoBinary
 
         static void Main(string[] args)
         {
-            if (args.Length > 0)
+            if (args.Length > 1)
             {
                 string inVal = "-?[0-9]*.[0-9]*(?:e-?[0-9]*)?";
                 Regex positionRegex = new Regex("v +(" + inVal + ") (" + inVal + ") (" + inVal + ")");
@@ -81,7 +81,7 @@ namespace ModelOBJtoBinary
                 //PrintList("Textures", uvs);
                 //PrintList("Indices", indices);
 
-                string end = args[0].Substring( 0, args[0].LastIndexOf('.') ) + ".mod";
+                string end = args[1];// args[0].Substring(0, args[0].LastIndexOf('.')) + ".mod";
                 BinaryWriter write = new BinaryWriter(new FileStream(end, FileMode.Create));
 
                 for (int i = 0; i < indices.Count; i++)

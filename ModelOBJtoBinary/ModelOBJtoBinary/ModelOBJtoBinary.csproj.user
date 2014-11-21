@@ -12,6 +12,6 @@
     <VerifyUploadedFiles>false</VerifyUploadedFiles>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
-    <StartArguments>D:\Repositories\NewCPPWorkingRepo\GATMachII\GAT380Game\Resources\biplane.obj</StartArguments>
+    <StartArguments>D:\Repositories\NewCPPWorkingRepo\GATMachII\Assets\biplane.obj D:\Repositories\NewCPPWorkingRepo\GATMachII\Assets\biplane.mode</StartArguments>
   </PropertyGroup>
 </Project>

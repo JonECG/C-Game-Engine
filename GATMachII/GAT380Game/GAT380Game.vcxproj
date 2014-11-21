@@ -61,7 +61,10 @@
     <Import Project="..\..\CommonProperties.props" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <CustomBuildBeforeTargets>
+    </CustomBuildBeforeTargets>
+  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" />
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -78,18 +81,15 @@
       <Command>
       </Command>
     </PreLinkEvent>
-    <PostBuildEvent>
-      <Command>IF EXIST "$(SolutionDir)RunDlls\*.dll" xcopy /Y "$(SolutionDir)RunDlls\*.dll" "$(SolutionDir)$(TempDirectory)$(Configuration)\Bin\"
-
-IF NOT EXIST "$(SolutionDir)$(TempDirectory)$(Configuration)\Lib\" mkdir "$(SolutionDir)$(TempDirectory)$(Configuration)\Lib\"
-IF EXIST "$(SolutionDir)$(TempDirectory)$(Configuration)\Bin\*.lib" move /Y "$(SolutionDir)$(TempDirectory)$(Configuration)\Bin\*.lib" "$(SolutionDir)$(TempDirectory)$(Configuration)\Lib\"
-
-IF EXIST "$(SolutionDir)$(TempDirectory)$(Configuration)\Bin\*.exe" xcopy /Y "$(SolutionDir)$(TempDirectory)$(Configuration)\Bin\*.exe" "$(SolutionDir)$(TempDirectory)$(Configuration)\Game\"
-IF EXIST "$(SolutionDir)$(TempDirectory)$(Configuration)\Bin\*.dll" xcopy /Y "$(SolutionDir)$(TempDirectory)$(Configuration)\Bin\*.dll" "$(SolutionDir)$(TempDirectory)$(Configuration)\Game\"
-
-IF EXIST "$(ProjectDir)Resources\*" xcopy /Y /s /i "$(ProjectDir)Resources\*" "$(SolutionDir)$(TempDirectory)$(Configuration)\Bin\Resources"
-IF EXIST "$(ProjectDir)Resources\*" xcopy /Y /s /i "$(ProjectDir)Resources\*" "$(SolutionDir)$(TempDirectory)$(Configuration)\Game\Resources"</Command>
-    </PostBuildEvent>
+    <PostBuildEvent />
+    <PreBuildEvent>
+      <Command>IF EXIST "$(SolutionDir)Assets\*" xcopy /Y /s /i "$(SolutionDir)Assets\*" "$(SolutionDir)$(TempDirectory)$(Configuration)\Bin\Assets"
+IF EXIST "$(SolutionDir)Assets\*" xcopy /Y /s /i "$(SolutionDir)Assets\*" "$(SolutionDir)$(TempDirectory)$(Configuration)\Game\Assets"
+call "$(SolutionDir)AssetBuilder\AssetBuilder.exe" "$(SolutionDir)Assets\ " "$(SolutionDir)$(TempDirectory)$(Configuration)\Bin\Assets"
+IF EXIST "$(SolutionDir)$(TempDirectory)$(Configuration)\Bin\Assets\*" xcopy /Y /s /i "$(SolutionDir)$(TempDirectory)$(Configuration)\Bin\Assets\*" "$(SolutionDir)$(TempDirectory)$(Configuration)\Game\Assets"</Command>
+    </PreBuildEvent>
+    <CustomBuildStep />
+    <CustomBuildStep />
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -110,18 +110,12 @@ IF EXIST "$(ProjectDir)Resources\*" xcopy /Y /s /i "$(ProjectDir)Resources\*" "$
       <Command>
       </Command>
     </PreLinkEvent>
-    <PostBuildEvent>
-      <Command>IF EXIST "$(SolutionDir)RunDlls\*.dll" xcopy /Y "$(SolutionDir)RunDlls\*.dll" "$(SolutionDir)$(TempDirectory)$(Configuration)\Bin\"
-
-IF NOT EXIST "$(SolutionDir)$(TempDirectory)$(Configuration)\Lib\" mkdir "$(SolutionDir)$(TempDirectory)$(Configuration)\Lib\"
-IF EXIST "$(SolutionDir)$(TempDirectory)$(Configuration)\Bin\*.lib" move /Y "$(SolutionDir)$(TempDirectory)$(Configuration)\Bin\*.lib" "$(SolutionDir)$(TempDirectory)$(Configuration)\Lib\"
-
-IF EXIST "$(SolutionDir)$(TempDirectory)$(Configuration)\Bin\*.exe" xcopy /Y "$(SolutionDir)$(TempDirectory)$(Configuration)\Bin\*.exe" "$(SolutionDir)$(TempDirectory)$(Configuration)\Game\"
-IF EXIST "$(SolutionDir)$(TempDirectory)$(Configuration)\Bin\*.dll" xcopy /Y "$(SolutionDir)$(TempDirectory)$(Configuration)\Bin\*.dll" "$(SolutionDir)$(TempDirectory)$(Configuration)\Game\"
-
-IF EXIST "$(ProjectDir)Resources\*" xcopy /Y /s /i "$(ProjectDir)Resources\*" "$(SolutionDir)$(TempDirectory)$(Configuration)\Bin\Resources"
-IF EXIST "$(ProjectDir)Resources\*" xcopy /Y /s /i "$(ProjectDir)Resources\*" "$(SolutionDir)$(TempDirectory)$(Configuration)\Game\Resources"</Command>
-    </PostBuildEvent>
+    <PostBuildEvent />
+    <PreBuildEvent>
+      <Command>IF EXIST "$(SolutionDir)Assets\*" xcopy /Y /s /i "$(SolutionDir)Assets\*" "$(SolutionDir)$(TempDirectory)$(Configuration)\Bin\Assets"
+IF EXIST "$(SolutionDir)Assets\*" xcopy /Y /s /i "$(SolutionDir)Assets\*" "$(SolutionDir)$(TempDirectory)$(Configuration)\Game\Assets"
+assbuild "</Command>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
