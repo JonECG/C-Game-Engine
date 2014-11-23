@@ -7,6 +7,7 @@ public:
 	Entity * target;
 	float laxness;
 	glm::vec3 desiredOffset;
+	float desiredDistance;
 
 	FollowCamComponent();
 	void update(float dt);

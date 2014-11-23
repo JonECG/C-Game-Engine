@@ -64,7 +64,7 @@ bool needsReplace( std::string sourceFile, std::string destinationFile )
 		result = sourceFileStat.st_mtime > destFileStat.st_mtime;
 	} 
 
-	return true;//result;
+	return result;
 }
 
 void stringReplaceAll( std::string * source, std::string search, std::string replace )
@@ -80,12 +80,12 @@ void stringReplaceAll( std::string * source, std::string search, std::string rep
 int main( int argc, char * argv[] )
 {
 	//TEST
-	argc = 4;
+	/*argc = 4;
 	char * what[] = {	"D:/Repositories/NewCPPWorkingRepo/GATMachII/AssetBuilder/AssetBuilder.exe",
 						"D:/Repositories/NewCPPWorkingRepo/GATMachII/Assets/ ",
 						"D:/Repositories/NewCPPWorkingRepo/GATMachII/Temp/Debug/Bin/Assets/ ",
 						"D:/Repositories/NewCPPWorkingRepo/GATMachII/../ModelOBJtoBinary/ModelOBJtoBinary/bin/Debug/ModelOBJtoBinary.exe" };
-	argv = what;
+	argv = what;*/
 	//ENDTEST
 
 	std::string converted[10];

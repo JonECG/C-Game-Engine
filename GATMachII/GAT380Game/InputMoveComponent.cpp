@@ -17,8 +17,11 @@ void InputMoveComponent::update( float dt )
 	auto plane = parent->getComponent<PlaneComponent>();
 	auto uc = parent->getStage()->getGame()->getUserController();
 
-	plane->dir -= (uc->isKeyDown('D')?1:0) * 150 * dt;
-	plane->dir += (uc->isKeyDown('A')?1:0) * 150 * dt;
+	/*plane->dir -= (uc->isKeyDown('D')?1:0) * 150 * dt;
+	plane->dir += (uc->isKeyDown('A')?1:0) * 150 * dt;*/
+
+	plane->turning += (uc->isKeyDown('D')?1:0) * dt * 0.1f;
+	plane->turning -= (uc->isKeyDown('A')?1:0) * dt * 0.1f;
 
 	plane->speed += (uc->isKeyDown('W')?1:0) * 10 * dt;
 	plane->speed -= (uc->isKeyDown('S')?1:0) * 10 * dt;

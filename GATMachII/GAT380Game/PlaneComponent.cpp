@@ -10,14 +10,17 @@
 #include "BulletComponent.h"
 #include "Components\ColliderComponent.h"
 #include "GroundComponent.h"
+#include <glm\ext.hpp>
 
 PlaneComponent::PlaneComponent()
 {
-	dir = 0;
+	dir = glm::vec3( 0, 0, 1 );
 	speed = 20;
 	health = 100;
 	coolDown = 0;
-	maxSpeed = 50.0f;
+	maxSpeed = 0.5f;
+	height = 1.04f;
+	turning = 0;
 }
 void PlaneComponent::init()
 {
@@ -66,12 +69,30 @@ void PlaneComponent::update( float dt )
 		parent->getStage()->deleteEntity( parent );
 	}
 	coolDown -= dt;
-	speed = std::max( 25.0f, std::min( maxSpeed, speed ) );
+
+	speed = std::max( 0.01f, std::min( maxSpeed, speed ) );
 	auto trans = parent->getComponent<TransformComponent>();
-	//trans->setScale( glm::vec3( 0.5f, 0.5f, 0.5f ) );
-	trans->setRotation( glm::vec3( 0, 0, 1 ), dir );
-	trans->rotate(glm::vec3( 1, 0, 0 ), dir);
-	trans->setTranslation( trans->getTranslation() + glm::vec3( std::cos(3.14f*dir/180), std::sin(3.14f*dir/180), 0 )*speed * dt);
+
+	glm::vec3 prevPos = trans->getTranslation();
+	glm::vec3 intendedPos = prevPos + glm::normalize( dir + glm::cross( dir, glm::normalize( prevPos ) ) * turning ) * speed * dt;
+	glm::vec3 actPos = glm::normalize( intendedPos ) * height;
+
+	dir = glm::normalize( actPos - prevPos );
+
+	trans->setScale( glm::vec3( 0.001f ) );
+
+	glm::vec3 zaxis = -dir;
+	glm::vec3 xaxis = glm::normalize(glm::cross(glm::normalize( actPos ), zaxis));
+	glm::vec3 yaxis = glm::cross(zaxis, xaxis);
+
+	glm::mat3 lookMat = glm::mat3( -zaxis, yaxis, xaxis );
+
+	trans->setRotation( lookMat );
+	trans->rotate(glm::vec3( 1, 0, 0 ), turning * 450);
+	//trans->setRotation( glm::vec3( 0, 0, 1 ), dir );
+	
+
+	trans->setTranslation( actPos );
 }
 void PlaneComponent::onCollide( Entity * other, glm::vec3 collisionNormal, float interpenetration )
 {

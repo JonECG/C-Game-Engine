@@ -14,6 +14,7 @@
 #include "PlaneComponent.h"
 #include "AIPilotComponent.h"
 #include "GroundComponent.h"
+#include "PlanetComponent.h"
 
 #include <Renderer\Renderable.h>
 
@@ -44,18 +45,25 @@ void LevelControllerComponent::startGame()
 	thing->addComponent( new PlaneComponent() );
 	thing->gc<PlaneComponent>()->alignment = 0;
 	thing->gc<PlaneComponent>()->bullet = bullet;
-	thing->getComponent<TransformComponent>()->setTranslation( glm::vec3( 0, 30, 0 ) );
+	thing->getComponent<TransformComponent>()->setTranslation( glm::vec3( 0, 1, 0 ) );
 	thing->gc<RenderComponent>()->setRenderable( friendlyPlane );
 	parent->getStage()->addEntity(thing);
 
 	player = thing;
 
 	cam->gc<FollowCamComponent>()->target = thing;
-	cam->gc<FollowCamComponent>()->laxness = 80;
-	cam->gc<FollowCamComponent>()->desiredOffset = glm::vec3( 0, 5, 300 );
+	cam->gc<FollowCamComponent>()->laxness = 10;
+	//cam->gc<FollowCamComponent>()->desiredOffset = glm::vec3( 0, -1.0f, 0);
+	cam->gc<FollowCamComponent>()->desiredDistance = 0.2f;
 	cam->gc<CameraComponent>()->camFar = 2000;
 
-	for( int i = 0; i < 4; i++ )
+	Entity * planet = new Entity();
+	planet->addComponent( new TransformComponent() );
+	planet->addComponent( new RenderComponent() );
+	planet->addComponent( new PlanetComponent() );
+	parent->getStage()->addEntity( planet );
+
+	for( int i = 6; i < 4; i++ )
 	{
 		thing = makeAThing();
 		thing->gc<ColliderComponent>()->setAsBox( glm::vec3( (i%2 == 0) ? 100 : 5, (i%2 == 0) ? 5 : 100, 5 ) );
@@ -65,6 +73,7 @@ void LevelControllerComponent::startGame()
 		parent->getStage()->addEntity(thing);
 		thing->getComponent<TransformComponent>()->setTranslation( ( ( i < 2 ) ? 1.0f : -1.0f ) * glm::vec3(  ( (i%2 == 0) ? 0 : 95 ), (i%2 == 0) ? 95 : 0, 0 ) );
 	}
+
 }
 
 LevelControllerComponent::LevelControllerComponent()
@@ -78,7 +87,7 @@ void LevelControllerComponent::update( float dt )
 {
 	time += dt;
 
-	if( time > 10 )
+	if( time > 1000 )
 	{
 		time = 0;
 

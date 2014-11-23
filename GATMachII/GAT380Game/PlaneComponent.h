@@ -1,5 +1,6 @@
 #pragma once
 #include "Component.h"
+#include <glm\glm.hpp>
 struct Renderable;
 class PlaneComponent : public Component
 {
@@ -8,7 +9,9 @@ class PlaneComponent : public Component
 public:
 	int alignment;
 	Renderable * bullet;
-	float dir;
+	float height;
+	float turning;
+	glm::vec3 dir;
 	float speed;
 	float maxSpeed;
 

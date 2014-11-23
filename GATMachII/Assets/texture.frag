@@ -13,10 +13,12 @@ uniform float tightness;
 uniform vec4 eye;
 
 uniform int useTexture;
+uniform int useTransMap;
 uniform int useLighting;
 uniform vec4 colorInfluence;
 
 uniform sampler2D tex;
+uniform sampler2D trans;
 
 out vec4 color;
 
@@ -28,7 +30,14 @@ void main()
 	}
 	else
 	{
-		color = vColor * colorInfluence;
+		color = colorInfluence;
+	}
+	
+	if( useTransMap != 0 )
+	{
+		vec4 transparency = texture2D(trans, vUv);
+		if( transparency.r < .3 )
+			discard;
 	}
 	
 	if( useLighting != 0 )
