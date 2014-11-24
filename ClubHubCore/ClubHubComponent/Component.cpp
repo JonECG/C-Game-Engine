@@ -65,3 +65,13 @@ void Component::update( float dt )
 {
 	dt;
 }
+
+void Component::earlyUpdate( float dt )
+{
+	dt;
+}
+
+void Component::lateUpdate( float dt )
+{
+	dt;
+}

@@ -17,7 +17,7 @@ PlanetComponent::PlanetComponent()
 {
 	noiseMap = 0;
 	currentRot = 0;
-	orbitRate = 1;
+	orbitRate = 0.1f;
 	twinkleTime = 0;
 }
 
@@ -59,10 +59,10 @@ void PlanetComponent::init()
 
 	auto rend = getParent()->gc<RenderComponent>();
 	auto cont =  getParent()->getStage()->getGame()->getContentManager();
-	Geometry * sphereGeo = ShapeGenerator::createSphere( cont, 100 );
+	Geometry * sphereGeo = ShapeGenerator::createSphere( cont, 200 );
 	rend->setRenderable( sphereGeo->makeRenderable( cont->loadShader( "Assets/perlin.vert", "Assets/perlin.frag" ), noiseMap, true ) );
 	getParent()->gc<TransformComponent>()->setScale( glm::vec3( 1 ) );
-	getParent()->gc<TransformComponent>()->setRotation( glm::mat3( glm::rotate( glm::mat4(), 90.0f, glm::vec3( 1,0, 0 ) ) * glm::rotate( glm::mat4(), 90.0f, glm::vec3( 0, 0, 1 ) ) ) );
+	//getParent()->gc<TransformComponent>()->setRotation( glm::mat3( glm::rotate( glm::mat4(), 90.0f, glm::vec3( 1,0, 0 ) ) * glm::rotate( glm::mat4(), 90.0f, glm::vec3( 0, 0, 1 ) ) ) );
 
 	Entity * starrySky = new Entity;
 	starrySky->addComponent( new RenderComponent() );

@@ -18,11 +18,18 @@ CameraComponent::CameraComponent()
 
 void CameraComponent::lookAt( glm::vec3 to, glm::vec3 up )
 {
-	to;
-	up;
-
-	glm::mat4 mat = glm::lookAt( parent->getComponent<TransformComponent>()->getTranslation(), to, up );
+	//glm::mat4 mat = glm::lookAt( parent->getComponent<TransformComponent>()->getTranslation(), to, up );
 	//parent->getComponent<TransformComponent>()->setRotation( glm::mat3( mat ) );
+
+	glm::vec3 from = parent->getComponent<TransformComponent>()->getTranslation();
+
+	glm::vec3 zaxis = -glm::normalize(to - from);
+	glm::vec3 xaxis = glm::normalize(glm::cross(up, zaxis));
+	glm::vec3 yaxis = glm::cross(zaxis, xaxis);
+
+	glm::mat3 lookMat = glm::mat3( xaxis, yaxis, zaxis );
+
+	parent->getComponent<TransformComponent>()->setRotation( lookMat );
 	/*TransformComponent * trans = parent->getComponent<TransformComponent>();
 	if( trans != nullptr )
 	{

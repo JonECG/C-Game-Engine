@@ -18,8 +18,8 @@ PlaneComponent::PlaneComponent()
 	speed = 20;
 	health = 100;
 	coolDown = 0;
-	maxSpeed = 0.5f;
-	height = 1.04f;
+	maxSpeed = 0.2f;
+	height = 1.03f;
 	turning = 0;
 }
 void PlaneComponent::init()
@@ -46,8 +46,8 @@ void PlaneComponent::fire()
 		entity->gc<ColliderComponent>()->setAsBox( glm::vec3( 1, 1, 1 ) );
 		entity->gc<PlaneComponent>()->dir = dir;
 		entity->gc<PlaneComponent>()->alignment = alignment;
-		entity->gc<PlaneComponent>()->speed = 100+speed;
-		entity->gc<PlaneComponent>()->maxSpeed = 100+speed;
+		entity->gc<PlaneComponent>()->speed = 0.2f+speed;
+		entity->gc<PlaneComponent>()->maxSpeed = 0.2f+speed;
 		coolDown = 1.0f;
 	}
 }
@@ -70,6 +70,8 @@ void PlaneComponent::update( float dt )
 	}
 	coolDown -= dt;
 
+	turning *= 0.95f;
+
 	speed = std::max( 0.01f, std::min( maxSpeed, speed ) );
 	auto trans = parent->getComponent<TransformComponent>();
 
@@ -79,13 +81,16 @@ void PlaneComponent::update( float dt )
 
 	dir = glm::normalize( actPos - prevPos );
 
-	trans->setScale( glm::vec3( 0.001f ) );
-
 	glm::vec3 zaxis = -dir;
 	glm::vec3 xaxis = glm::normalize(glm::cross(glm::normalize( actPos ), zaxis));
 	glm::vec3 yaxis = glm::cross(zaxis, xaxis);
 
 	glm::mat3 lookMat = glm::mat3( -zaxis, yaxis, xaxis );
+
+	if( parent->hasComponent<BulletComponent>() )
+		trans->setScale( glm::vec3( 0.006f ) );
+	else
+		trans->setScale( glm::vec3( 0.001f ) );
 
 	trans->setRotation( lookMat );
 	trans->rotate(glm::vec3( 1, 0, 0 ), turning * 450);

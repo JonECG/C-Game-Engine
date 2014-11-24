@@ -17,6 +17,8 @@ public:
 	virtual void destroy();
 	virtual void draw();
 	virtual void update( float dt );
+	virtual void lateUpdate( float dt );
+	virtual void earlyUpdate( float dt );
 	virtual void onCollide( Entity * other, glm::vec3 collisionNormal, float interpenetration );
 	friend Entity;
 };

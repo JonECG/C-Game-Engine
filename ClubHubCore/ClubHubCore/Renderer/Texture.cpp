@@ -25,3 +25,12 @@ Texture* Texture::createTexture(int width, int height, GLenum component, GLenum 
 
 	return t;
 }
+
+void Texture::updateTexture( int width, int height, void * data, GLenum component, GLenum format, GLenum type )
+{
+	glBindTexture( GL_TEXTURE_2D, textureID );
+	glTexImage2D(GL_TEXTURE_2D, 0, component, width, height, 0, format, type, data);
+	
+	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
+	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+}

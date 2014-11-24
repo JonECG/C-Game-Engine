@@ -5,5 +5,6 @@ class ContentManager;
 namespace ShapeGenerator
 {
 	extern EXPORT Geometry * createCube( ContentManager * content );
+	extern EXPORT Geometry * createSphere( ContentManager * content, int subdivisions );
 };
 

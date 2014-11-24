@@ -68,7 +68,9 @@
     </CustomBuildBeforeTargets>
     <CustomBuildAfterTargets>Build</CustomBuildAfterTargets>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <CustomBuildAfterTargets>Build</CustomBuildAfterTargets>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
@@ -117,11 +119,13 @@ IF EXIST "$(SolutionDir)$(TempDirectory)$(Configuration)\Bin\Assets\*" xcopy /Y 
       </Command>
     </PreLinkEvent>
     <PostBuildEvent />
-    <PreBuildEvent>
-      <Command>IF EXIST "$(SolutionDir)Assets\*" xcopy /Y /s /i "$(SolutionDir)Assets\*" "$(SolutionDir)$(TempDirectory)$(Configuration)\Bin\Assets"
-IF EXIST "$(SolutionDir)Assets\*" xcopy /Y /s /i "$(SolutionDir)Assets\*" "$(SolutionDir)$(TempDirectory)$(Configuration)\Game\Assets"
-assbuild "</Command>
-    </PreBuildEvent>
+    <PreBuildEvent />
+    <CustomBuildStep>
+      <Command>IF NOT EXIST "$(SolutionDir)$(TempDirectory)$(Configuration)\Bin\Assets\" mkdir "$(SolutionDir)$(TempDirectory)$(Configuration)\Bin\Assets\";
+call "$(SolutionDir)AssetBuilder\AssetBuilder.exe" "$(SolutionDir)Assets\ " "$(SolutionDir)$(TempDirectory)$(Configuration)\Bin\Assets\ " "$(SolutionDir)..\ModelOBJtoBinary\ModelOBJtoBinary\bin\Debug\ModelOBJtoBinary.exe"
+IF EXIST "$(SolutionDir)$(TempDirectory)$(Configuration)\Bin\Assets\*" xcopy /Y /s /i "$(SolutionDir)$(TempDirectory)$(Configuration)\Bin\Assets\*" "$(SolutionDir)$(TempDirectory)$(Configuration)\Game\Assets"</Command>
+      <Outputs>afadf</Outputs>
+    </CustomBuildStep>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

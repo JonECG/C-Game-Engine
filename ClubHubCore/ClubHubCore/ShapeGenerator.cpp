@@ -4,6 +4,55 @@
 #include "Renderer\Vertex.h"
 #include "GL\glew.h"
 
+#include <iostream>
+
+Geometry * ShapeGenerator::createSphere( ContentManager * cont, int subdivisions )
+{
+	Vertex * v = new Vertex[ (subdivisions+1) * (subdivisions+1) ];
+
+	Geometry * result;
+
+	for( int ring = 0; ring <= subdivisions; ring++ )
+	{
+		float y = std::cos( 3.1416f * float( ring )/subdivisions );
+		float portionOfXZ = std::sin( 3.1416f * float( ring )/subdivisions );
+
+		//std::cout << y <<", " << portionOfXZ << std::endl;
+		for( int sector = 0; sector <= subdivisions; sector++ )
+		{
+			v[ ring * (subdivisions+1) + sector ].setPosition( glm::vec3( portionOfXZ * std::cos( 6.284f * float(sector)/subdivisions ), y, portionOfXZ * std::sin( 6.284f * float(sector) / subdivisions ) ) );
+			v[ ring * (subdivisions+1) + sector ].setNormal( v[ ring * (subdivisions+1) + sector ].getPosition() );
+			v[ ring * (subdivisions+1) + sector ].setColor( glm::vec4( 1,1,1,1 ) );
+			v[ ring * (subdivisions+1) + sector ].setUv( glm::vec2( float(sector)/subdivisions, float(ring)/subdivisions ) );
+		}
+	}
+
+	unsigned short * indices = new unsigned short[ 6 * subdivisions * subdivisions ];
+	int index = 0;
+	for( int ring = 0; ring < subdivisions; ring++ )
+	{
+		for( int sector = 0; sector < subdivisions; sector++ )
+		{
+			//Face 1
+			indices[index++] = (unsigned short) ( (ring) * (subdivisions+1) + (sector) );
+			indices[index++] = (unsigned short) ( (ring) * (subdivisions+1) + (sector+1) );
+			indices[index++] = (unsigned short) ( (ring+1) * (subdivisions+1) + (sector) );
+
+			//Face 2
+			indices[index++] = (unsigned short) ( (ring+1) * (subdivisions+1) + (sector) );
+			indices[index++] = (unsigned short) ( (ring) * (subdivisions+1) + (sector+1) );
+			indices[index++] = (unsigned short) ( (ring+1) * (subdivisions+1) + (sector+1) );
+		}
+	}
+
+	result = cont->addGeometry( v, (subdivisions+1) * (subdivisions+1), indices, 6 * subdivisions * subdivisions, GL_TRIANGLES );
+	Vertex::setAttributes( result );
+
+	delete v;
+	delete indices;
+
+	return result;
+}
 
 Geometry * ShapeGenerator::createCube( ContentManager * cont )
 {

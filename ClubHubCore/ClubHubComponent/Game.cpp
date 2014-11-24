@@ -14,7 +14,7 @@ Game::~Game()
 
 void Game::update( float dt )
 {
-	stage->update( dt );
+	stage->update( dt > 1 ? 1 : dt );
 }
 void Game::draw()
 {

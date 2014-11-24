@@ -1,10 +1,12 @@
 #include "Stage.h"
 #include "Entity.h"
 #include "Components\CameraComponent.h"
+#include "Components\TransformComponent.h"
 #include "Renderer\Renderable.h"
 #include "Window\Graphics.h"
 #include "Game.h"
 #include "Components\ColliderComponent.h"
+#include "Renderer\Shader.h"
 
 Stage::Stage()
 {
@@ -71,10 +73,29 @@ void Stage::update( float dt )
 			}
 			entities[i]->inited = true;
 		}
+	}
 
+	for( int i = 0; i < currentEntity; i++ )
+	{
+		for( int c = 0; c < entities[i]->components->count(); c++ )
+		{
+			entities[i]->components->getInserted( c )->earlyUpdate( dt );
+		}
+	}
+
+	for( int i = 0; i < currentEntity; i++ )
+	{
 		for( int c = 0; c < entities[i]->components->count(); c++ )
 		{
 			entities[i]->components->getInserted( c )->update( dt );
+		}
+	}
+
+	for( int i = 0; i < currentEntity; i++ )
+	{
+		for( int c = 0; c < entities[i]->components->count(); c++ )
+		{
+			entities[i]->components->getInserted( c )->lateUpdate( dt );
 		}
 	}
 
@@ -145,6 +166,8 @@ void Stage::draw()
 		if( hasEntity( renders[j]->getParent() ) )
 		{
 			renders[j]->setUp();
+			glm::vec4 eye = glm::vec4( renders[j]->getParent()->gc<TransformComponent>()->getTranslation(), 1 );
+			Shader::setGlobalUniformParameter( "eye", ParameterType::PT_VEC4, &eye );
 			for( int run = 0; run < renders[j]->getNumberOfRuns(); run++ )
 			{
 				renders[j]->startRun( run );

@@ -10,6 +10,6 @@ public:
 	float desiredDistance;
 
 	FollowCamComponent();
-	void update(float dt);
+	void lateUpdate(float dt);
 };
 

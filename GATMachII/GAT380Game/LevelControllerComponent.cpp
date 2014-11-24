@@ -52,9 +52,9 @@ void LevelControllerComponent::startGame()
 	player = thing;
 
 	cam->gc<FollowCamComponent>()->target = thing;
-	cam->gc<FollowCamComponent>()->laxness = 10;
+	cam->gc<FollowCamComponent>()->laxness = 5;
 	//cam->gc<FollowCamComponent>()->desiredOffset = glm::vec3( 0, -1.0f, 0);
-	cam->gc<FollowCamComponent>()->desiredDistance = 0.2f;
+	cam->gc<FollowCamComponent>()->desiredDistance = 0.05f;
 	cam->gc<CameraComponent>()->camFar = 2000;
 
 	Entity * planet = new Entity();

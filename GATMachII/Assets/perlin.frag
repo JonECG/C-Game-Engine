@@ -114,6 +114,7 @@ void main()
 		}
 		
 		newNormal = normalize( newNormal );
+		newNormal = vNormal;
 		//newNormal = findNearestNormal( vUv );
 	}
 	else
