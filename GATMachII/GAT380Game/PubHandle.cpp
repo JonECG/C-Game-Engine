@@ -45,14 +45,14 @@ void PubHandle::init( ContentManager* content, CoordinateTransform *transform, G
 	Stage * stage = new Stage();
 	game->setStage( stage );
 
-	Geometry * planeGeo = content->loadGeometry( "Assets/biplane.mod" );
+	Geometry * planeGeo = content->loadGeometry( "Assets/biplane.glmod" );
 	Geometry * cubeGeo = ShapeGenerator::createCube( content );
 
 	Entity * controller = new Entity();
 	LevelControllerComponent * cont = new LevelControllerComponent();
 	cont->friendlyPlane = planeGeo->makeRenderable( passShad, content->loadPreppedTexture( "Assets/planeTex.glt" ) );
 	cont->enemyPlane = planeGeo->makeRenderable( passShad, content->loadPreppedTexture( "Assets/planeTex.glt" ) );
-	cont->bullet = content->loadGeometry( "Assets/shovel.mod" )->makeRenderable(passShad,content->loadPreppedTexture( "Assets/ShovelTexture.glt" ));
+	cont->bullet = content->loadGeometry( "Assets/shovel.glmod" )->makeRenderable(passShad,content->loadPreppedTexture( "Assets/ShovelTexture.glt" ));
 	cont->ground = cubeGeo->makeRenderable( passShad, content->loadPreppedTexture( "Assets/brickyDiffuse.glt" ) );
 
 	controller->addComponent( cont );

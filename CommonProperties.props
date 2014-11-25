@@ -5,8 +5,8 @@
     <TempDirectory>Temp\</TempDirectory>
   </PropertyGroup>
   <PropertyGroup>
-    <OutDir>$(SolutionDir)$(TempDirectory)$(Configuration)\Bin\</OutDir>
-    <IntDir>$(SolutionDir)$(TempDirectory)$(Configuration)\Intermediates\</IntDir>
+    <OutDir>$(SolutionDir)$(TempDirectory)$(Configuration)\Bin\$(ProjectName)\</OutDir>
+    <IntDir>$(SolutionDir)$(TempDirectory)$(Configuration)\Intermediates\$(ProjectName)\</IntDir>
   </PropertyGroup>
   <ItemDefinitionGroup>
     <ClCompile>
@@ -18,13 +18,22 @@
       <TreatWarningAsError>true</TreatWarningAsError>
     </ClCompile>
     <PostBuildEvent>
-      <Command>IF EXIST "$(SolutionDir)RunDlls\*.dll" xcopy /Y "$(SolutionDir)RunDlls\*.dll" "$(SolutionDir)$(TempDirectory)$(Configuration)\Bin\"
+      <Command>IF "$(OutputType)" == "exe" (
+    IF EXIST "$(SolutionDir)RunDlls\*.dll" xcopy /Y "$(SolutionDir)RunDlls\*.dll" "$(SolutionDir)$(TempDirectory)$(Configuration)\Bin\$(ProjectName)\"
+)
 
 IF NOT EXIST "$(SolutionDir)$(TempDirectory)$(Configuration)\Lib\" mkdir "$(SolutionDir)$(TempDirectory)$(Configuration)\Lib\"
-IF EXIST "$(SolutionDir)$(TempDirectory)$(Configuration)\Bin\*.lib" move /Y "$(SolutionDir)$(TempDirectory)$(Configuration)\Bin\*.lib" "$(SolutionDir)$(TempDirectory)$(Configuration)\Lib\"
+IF EXIST "$(OutDir)*.lib" move /Y "$(OutDir)*.lib" "$(SolutionDir)$(TempDirectory)$(Configuration)\Lib\"
 
-IF EXIST "$(SolutionDir)$(TempDirectory)$(Configuration)\Bin\*.exe" xcopy /Y "$(SolutionDir)$(TempDirectory)$(Configuration)\Bin\*.exe" "$(SolutionDir)$(TempDirectory)$(Configuration)\Game\"
-IF EXIST "$(SolutionDir)$(TempDirectory)$(Configuration)\Bin\*.dll" xcopy /Y "$(SolutionDir)$(TempDirectory)$(Configuration)\Bin\*.dll" "$(SolutionDir)$(TempDirectory)$(Configuration)\Game\"</Command>
+IF not "$(OutDir)" == "$(SolutionDir)$(TempDirectory)$(Configuration)\Game\" goto :skipover
+IF EXIST "$(OutDir)$(ProjectName).*" move /Y "$(OutDir)$(ProjectName).*" "$(SolutionDir)$(TempDirectory)$(Configuration)\Bin\$(ProjectName)\"
+:skipover
+IF EXIST "$(SolutionDir)$(TempDirectory)$(Configuration)\Bin\$(ProjectName)\*.exe" xcopy /Y "$(SolutionDir)$(TempDirectory)$(Configuration)\Bin\$(ProjectName)\*.exe" "$(SolutionDir)$(TempDirectory)$(Configuration)\Game\"
+IF EXIST "$(SolutionDir)$(TempDirectory)$(Configuration)\Bin\$(ProjectName)\*.dll" xcopy /Y "$(SolutionDir)$(TempDirectory)$(Configuration)\Bin\$(ProjectName)\*.dll" "$(SolutionDir)$(TempDirectory)$(Configuration)\Game\"
+
+IF "$(Configuration)" == "Debug" (
+    IF EXIST "$(SolutionDir)$(TempDirectory)$(Configuration)\Bin\$(ProjectName)\*.pdb" xcopy /Y "$(SolutionDir)$(TempDirectory)$(Configuration)\Bin\$(ProjectName)\*.pdb" "$(SolutionDir)$(TempDirectory)$(Configuration)\Game\"
+)</Command>
     </PostBuildEvent>
     <Link>
       <AdditionalLibraryDirectories>$(SolutionDir)$(TempDirectory)$(Configuration)\Lib\</AdditionalLibraryDirectories>

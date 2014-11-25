@@ -67,9 +67,11 @@
     <CustomBuildBeforeTargets>
     </CustomBuildBeforeTargets>
     <CustomBuildAfterTargets>Build</CustomBuildAfterTargets>
+    <OutDir>$(SolutionDir)$(TempDirectory)$(Configuration)\Game\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <CustomBuildAfterTargets>Build</CustomBuildAfterTargets>
+    <OutDir>$(SolutionDir)$(TempDirectory)$(Configuration)\Game\</OutDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -91,9 +93,8 @@
     <CustomBuildStep />
     <CustomBuildStep />
     <CustomBuildStep>
-      <Command>IF NOT EXIST "$(SolutionDir)$(TempDirectory)$(Configuration)\Bin\Assets\" mkdir "$(SolutionDir)$(TempDirectory)$(Configuration)\Bin\Assets\";
-call "$(SolutionDir)AssetBuilder\AssetBuilder.exe" "$(SolutionDir)Assets\ " "$(SolutionDir)$(TempDirectory)$(Configuration)\Bin\Assets\ " "$(SolutionDir)..\ModelOBJtoBinary\ModelOBJtoBinary\bin\Debug\ModelOBJtoBinary.exe"
-IF EXIST "$(SolutionDir)$(TempDirectory)$(Configuration)\Bin\Assets\*" xcopy /Y /s /i "$(SolutionDir)$(TempDirectory)$(Configuration)\Bin\Assets\*" "$(SolutionDir)$(TempDirectory)$(Configuration)\Game\Assets"</Command>
+      <Command>IF NOT EXIST "$(OutDir)Assets\" mkdir "$(OutDir)Assets\";
+call "$(SolutionDir)$(TempDirectory)$(Configuration)\Bin\AssetBuilder\AssetBuilder.exe" "$(SolutionDir)Assets\ " "$(OutDir)Assets\ " "$(SolutionDir)..\ModelOBJtoBinary\ModelOBJtoBinary\bin\Debug\ModelOBJtoBinary.exe"</Command>
     </CustomBuildStep>
     <CustomBuildStep>
       <Outputs>afadf</Outputs>
@@ -121,9 +122,8 @@ IF EXIST "$(SolutionDir)$(TempDirectory)$(Configuration)\Bin\Assets\*" xcopy /Y 
     <PostBuildEvent />
     <PreBuildEvent />
     <CustomBuildStep>
-      <Command>IF NOT EXIST "$(SolutionDir)$(TempDirectory)$(Configuration)\Bin\Assets\" mkdir "$(SolutionDir)$(TempDirectory)$(Configuration)\Bin\Assets\";
-call "$(SolutionDir)AssetBuilder\AssetBuilder.exe" "$(SolutionDir)Assets\ " "$(SolutionDir)$(TempDirectory)$(Configuration)\Bin\Assets\ " "$(SolutionDir)..\ModelOBJtoBinary\ModelOBJtoBinary\bin\Debug\ModelOBJtoBinary.exe"
-IF EXIST "$(SolutionDir)$(TempDirectory)$(Configuration)\Bin\Assets\*" xcopy /Y /s /i "$(SolutionDir)$(TempDirectory)$(Configuration)\Bin\Assets\*" "$(SolutionDir)$(TempDirectory)$(Configuration)\Game\Assets"</Command>
+      <Command>IF NOT EXIST "$(OutDir)Assets\" mkdir "$(OutDir)Assets\";
+call "$(SolutionDir)$(TempDirectory)$(Configuration)\Bin\AssetBuilder\AssetBuilder.exe" "$(SolutionDir)Assets\ " "$(OutDir)Assets\ " "$(SolutionDir)..\ModelOBJtoBinary\ModelOBJtoBinary\bin\Debug\ModelOBJtoBinary.exe"</Command>
       <Outputs>afadf</Outputs>
     </CustomBuildStep>
   </ItemDefinitionGroup>
