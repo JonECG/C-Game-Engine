@@ -56,9 +56,14 @@ void CameraComponent::setUp()
 void CameraComponent::startRun( int run )
 {
 	run;
+	Graphics * g = parent->getStage()->getGame()->getGraphicsHandle();
+
+	g->setViewport( 0, 0, g->getWidth(), g->getHeight() );
+
 	glm::vec3 from = glm::vec3();
 	glm::vec3 to = glm::vec3(0,0,-1);
 	glm::vec3 up = glm::vec3(0,1,0);
+	aspect = float( g->getWidth() )/ g->getHeight();
 	TransformComponent * trans = parent->getComponent<TransformComponent>();
 	if( trans != nullptr )
 	{

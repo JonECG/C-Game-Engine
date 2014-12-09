@@ -6,6 +6,8 @@ class Entity;
 class AIPilotComponent : public Component
 {
 	glm::vec3 tweenPos;
+	float time;
+	bool following;
 public:
 	Entity * target;
 	AIPilotComponent();

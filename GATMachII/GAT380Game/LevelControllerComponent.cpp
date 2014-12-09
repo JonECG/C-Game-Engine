@@ -71,7 +71,7 @@ void LevelControllerComponent::startGame()
 
 	numEnemies = 0;
 
-	for( int i = 0; i < 0; i++ )
+	for( int i = 0; i < 3; i++ )
 	{
 		thing = makeAThing();
 		thing->addComponent( new AIPilotComponent() );

@@ -43,6 +43,9 @@ public:
 
 	void setDepthTesting( bool depthTest );
 
+	int getWidth();
+	int getHeight();
+
 	void freeDrawSpace();
 	void constrainDrawSpace( float x, float y, float w, float h );
 

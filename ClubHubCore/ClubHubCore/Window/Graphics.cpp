@@ -21,6 +21,7 @@
 
 Graphics::Graphics( ContentManager* content, CoordinateTransform *transform, ManagedGLWidget * handle )
 {
+	window = 0;
 	this->handle = handle;
 	currentTransform = new glm::mat4();
 	currentColor = new glm::vec4();
@@ -203,6 +204,14 @@ void Graphics::constrainDrawSpace( float x, float y, float w, float h )
 	glStencilFunc(GL_EQUAL, 1, 0xFF);	
 }
 
+int Graphics::getWidth()
+{
+	return ( handle ? handle->width() : 512 );
+}
+int Graphics::getHeight()
+{
+	return ( handle ? handle->height() : 512 );
+}
 
 void Graphics::setViewport( int x, int y, int w, int h )
 {

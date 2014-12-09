@@ -8,6 +8,8 @@
 AIPilotComponent::AIPilotComponent()
 {
 	tweenPos = glm::vec3();
+	time = 0;
+	following = false;
 }
 
 float getAngleDiff( glm::vec3 normal, glm::vec3 source, glm::vec3 direction, glm::vec3 target )
@@ -24,7 +26,14 @@ float getAngleDiff( glm::vec3 normal, glm::vec3 source, glm::vec3 direction, glm
 
 void AIPilotComponent::update( float dt )
 {
-	dt;
+	time += dt;
+
+	if( time > 4 )
+	{
+		time -= 4;
+		following = float( std::rand() )/RAND_MAX > 0.4f;
+	}
+
 	if( target && parent->getStage()->hasEntity( target ) )
 	{
 		auto myTc = parent->gc<TransformComponent>();
@@ -37,18 +46,22 @@ void AIPilotComponent::update( float dt )
 		}
 
 		float tweenAmount = 20;
-		if( float( std::rand() )/RAND_MAX < 0.1f )
+		if( float( std::rand() )/RAND_MAX < 0.2f )
 			tweenPos = ( tweenPos * tweenAmount + tc->getTranslation() ) / ( tweenAmount + 1 );
 
 		glm::vec3 planeNormal = glm::normalize( myTc->getTranslation() );
 		float angleDiff = getAngleDiff( planeNormal, myTc->getTranslation(), myPc->dir, tweenPos );
-		float actAngleDiff = getAngleDiff( planeNormal, myTc->getTranslation(), myPc->dir, tc->getTranslation() );
+		//float actAngleDiff = getAngleDiff( planeNormal, myTc->getTranslation(), myPc->dir, tc->getTranslation() );
 		
-		myPc->turning += ( ( angleDiff > 0 ) ? 1 : -1 ) * dt * std::min( std::abs(angleDiff)/10, 0.1f );
-		
-		if( std::abs( actAngleDiff ) < 0.2f )
+		if( following )
 		{
-			myPc->fire();
+			myPc->turning += ( ( angleDiff > 0 ) ? 1 : -1 ) * dt * std::min( std::abs(angleDiff)/10, 0.1f );
+
+			//std::cout << angleDiff << std::endl;
+			if( std::abs( angleDiff ) < 1.0f )
+			{
+				myPc->fire();
+			}
 		}
 	}
 }
