@@ -18,6 +18,7 @@
 Component::Component()
 {
 	this->parent = nullptr;
+	inited = false;
 	id = 0;
 }
 

@@ -24,6 +24,12 @@ PlaneComponent::PlaneComponent()
 }
 void PlaneComponent::init()
 {
+	auto trans = parent->getComponent<TransformComponent>();
+
+	if( parent->hasComponent<BulletComponent>() )
+		trans->setScale( glm::vec3( 0.006f ) );
+	else
+		trans->setScale( glm::vec3( 0.001f ) );
 }
 void PlaneComponent::destroy()
 {
@@ -43,7 +49,7 @@ void PlaneComponent::fire()
 		entity->gc<RenderComponent>()->setRenderable( bullet->makeCopy() );
 		entity->gc<TransformComponent>()->setTranslation( parent->gc<TransformComponent>()->getTranslation() );
 		entity->gc<TransformComponent>()->setScale(glm::vec3(3,3,3));
-		entity->gc<ColliderComponent>()->setAsBox( glm::vec3( 1, 1, 1 ) );
+		entity->gc<ColliderComponent>()->setAsSphere( 0.005f );
 		entity->gc<PlaneComponent>()->dir = dir;
 		entity->gc<PlaneComponent>()->alignment = alignment;
 		entity->gc<PlaneComponent>()->speed = 0.2f+speed;
@@ -57,13 +63,17 @@ void PlaneComponent::draw()
 	{
 		parent->getStage()->getGame()->getGraphicsHandle()->setTransform( glm::mat4() );
 		if( alignment == 0 )
-			parent->getStage()->getGame()->getGraphicsHandle()->drawText( 0.0f, 0.0f, ("Health: " + std::to_string( health )).c_str(), 0.1f );
+			parent->getStage()->getGame()->getGraphicsHandle()->drawText( -0.95f, 0.95f, ("Health: " + std::to_string( health )).c_str(), 0.1f );
 		//else
 		//	parent->getStage()->getGame()->getGraphicsHandle()->drawText( -1.0f, 0.85f, ("Enemy Health: " + std::to_string( health )).c_str(), 0.1f );
 	}
 }
 void PlaneComponent::update( float dt )
 {
+	if( parent->hasComponent<BulletComponent>() )
+	{
+		health -= dt * 30;
+	}
 	if ( health <= 0 )
 	{
 		parent->getStage()->deleteEntity( parent );

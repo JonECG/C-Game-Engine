@@ -30,7 +30,22 @@ void main()
 	if( useTexture != 0 )
 	{
 		//float dist = 2 * max( 0, min( 0.5, 0.6-length( vUv - vec2( 0.5, 0.5 ) ) ) );
-		vec4 grabbedColor = texture2D(tex, vUv );
+		
+		float angleX = ( 1 - ( ( dot( vec3( 1, 0, 0 ), normalize( vec3( vPosition.x, 0, vPosition.z ) ) ) + 1 ) / 2 ) ) / 2;
+		if( dot( normalize( vec3( vPosition.x, 0, vPosition.z ) ), vec3( 0, 0, 1 ) ) > 0 )
+		{
+			angleX = 1 - angleX;
+		}
+		
+		float angleY = dot( normalize( vec3( vPosition ) ), normalize( vec3( vPosition.x, 0, vPosition.z ) ) ) / 2;
+		if( ( dot( normalize( vec3( vPosition ) ), vec3( 0, 1, 0 ) ) > 0 ) )
+		{
+			angleY = 1 - angleY;
+		}
+		//vec3 normypos = normalize( vPosition );
+		vec2 sampleUV = vec2( angleX, angleY );
+	
+		vec4 grabbedColor = texture2D(tex, sampleUV );
 		
 		color = vec4(0,0,0,0);
 		
@@ -39,13 +54,13 @@ void main()
 		color.x = max( 0, (2* grabbedColor.x - 1)/ factor );
 		color.z = max( 0, (2* -grabbedColor.x + 1)/ factor );
 		
-		color.x += max( 0, (2* texture2D(tex, -vUv ).x - 1)/ factor );
-		color.y += max( 0, (2* -texture2D(tex, -vUv ).x + 1)/ factor );
-		color.z += max( 0, (2* texture2D(tex, -vUv ).x - 1)/ factor );
+		color.x += max( 0, (2* texture2D(tex, -sampleUV ).x - 1)/ factor );
+		color.y += max( 0, (2* -texture2D(tex, -sampleUV ).x + 1)/ factor );
+		color.z += max( 0, (2* texture2D(tex, -sampleUV ).x - 1)/ factor );
 		
 		//Stars
 		float divisor = grabbedColor.x + 0.25;
-		vec2 usingUv = vec2( -vUv.y * 2, vUv.x/3 + 3 );
+		vec2 usingUv = vec2( -sampleUV.y * 2, sampleUV.x/3 + 3 );
 		float starAmount = 100 * max( max( 0, 0.01 - abs( mod( usingUv.x, divisor ) - divisor/2 ) )
 		, max( 0, 0.01 - abs( mod( usingUv.y, divisor ) - divisor/2 ) ) );
 		divisor = 0.0001;
@@ -92,7 +107,7 @@ void main()
 		//vec4 skyBack = twilightSkyBack;
 		vec4 cloud = vec4( 1, 1, 1, 1 );
 		
-		float clouding = max( 0, pow( (1.5* texture2D(tex, vec2( vUv.y, vUv.xx) ).x -0.5)/ 2 , 1.2f ) );
+		float clouding = max( 0, pow( (1.5* texture2D(tex, vec2( sampleUV.y, sampleUV.xx) ).x -0.5)/ 2 , 1.2f ) );
 		
 		vec4 skyColor = skyBack + ( cloud - skyBack ) * ( clouding * (1-rawrat) );
 		

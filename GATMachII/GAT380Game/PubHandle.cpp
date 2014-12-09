@@ -36,7 +36,9 @@ void PubHandle::init( ContentManager* content, CoordinateTransform *transform, G
 
 	cow = content->loadPreppedTexture( "Assets/cow.glt" );
 	font = content->loadFont( "Assets/Tahoma.bfnt" );
-	Shader * passShad = content->loadShader( "Assets/passThrough.vert", "Assets/passThrough.frag" );
+	//Shader * passShad = content->loadShader( "Assets/passThrough.vert", "Assets/passThrough.frag" );
+	Shader * planeShad = content->loadShader( "Assets/plane.vert", "Assets/plane.frag" );
+	Shader * textureShad = content->loadShader( "Assets/texture.vert", "Assets/texture.frag" );
 
 	game = new Game();
 	game->subscribeContentManager( content );
@@ -50,10 +52,11 @@ void PubHandle::init( ContentManager* content, CoordinateTransform *transform, G
 
 	Entity * controller = new Entity();
 	LevelControllerComponent * cont = new LevelControllerComponent();
-	cont->friendlyPlane = planeGeo->makeRenderable( passShad, content->loadPreppedTexture( "Assets/planeTex.glt" ) );
-	cont->enemyPlane = planeGeo->makeRenderable( passShad, content->loadPreppedTexture( "Assets/planeTex.glt" ) );
-	cont->bullet = content->loadGeometry( "Assets/shovel.glmod" )->makeRenderable(passShad,content->loadPreppedTexture( "Assets/ShovelTexture.glt" ));
-	cont->ground = cubeGeo->makeRenderable( passShad, content->loadPreppedTexture( "Assets/brickyDiffuse.glt" ) );
+	cont->friendlyPlane = planeGeo->makeRenderable( planeShad, content->loadPreppedTexture( "Assets/planeTex.glt" ) );
+	cont->enemyPlane = planeGeo->makeRenderable( planeShad, content->loadPreppedTexture( "Assets/planeTex.glt" ) );
+	cont->bullet = content->loadGeometry( "Assets/shovel.glmod" )->makeRenderable(textureShad,content->loadPreppedTexture( "Assets/ShovelTexture.glt" ));
+	cont->ground = cubeGeo->makeRenderable( textureShad, content->loadPreppedTexture( "Assets/brickyDiffuse.glt" ) );
+	cont->indicator = content->loadGeometry( "Assets/arrow.glmod" )->makeRenderable(textureShad);//, content->loadPreppedTexture( "Assets/ShovelTexture.glt" ));
 
 	controller->addComponent( cont );
 	stage->addEntity( controller );

@@ -6,6 +6,7 @@ class Entity;
 class EXPORT Component
 {	
 	int id;
+	bool inited;
 protected:
 	Entity * parent;
 public:
@@ -21,5 +22,6 @@ public:
 	virtual void earlyUpdate( float dt );
 	virtual void onCollide( Entity * other, glm::vec3 collisionNormal, float interpenetration );
 	friend Entity;
+	friend class Stage;
 };
 

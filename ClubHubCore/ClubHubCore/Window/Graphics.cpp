@@ -104,7 +104,6 @@ void Graphics::drawRenderable( const Renderable* renderable )
 		glUseProgram( renderable->howShader->shaderProgramID );
 
 		GLint loc = glGetUniformLocation( renderable->howShader->shaderProgramID, "useTexture");
-
 		if( renderable->texture != NULL )
 		{
 			if (loc != -1)
@@ -121,6 +120,16 @@ void Graphics::drawRenderable( const Renderable* renderable )
 		{
 			if (loc != -1)
 				glUniform1i(loc, 0);
+		}
+
+		if( renderable->optionalTexture != NULL )
+		{
+			glActiveTexture( GL_TEXTURE1 );
+
+			glBindTexture( GL_TEXTURE_2D, renderable->optionalTexture->textureID );
+
+			loc = glGetUniformLocation( renderable->howShader->shaderProgramID, "opttex");
+			glUniform1i(loc, 1);
 		}
 
 		loc = glGetUniformLocation( renderable->howShader->shaderProgramID, "useLighting");

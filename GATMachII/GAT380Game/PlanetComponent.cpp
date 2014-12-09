@@ -15,11 +15,13 @@
 
 PlanetComponent::PlanetComponent()
 {
-	noiseMap = 0;
+	//noiseMap = 0;
 	currentRot = 0;
 	orbitRate = 0.1f;
 	twinkleTime = 0;
 }
+
+Texture * PlanetComponent::noiseMap = 0;
 
 void PlanetComponent::init()
 {

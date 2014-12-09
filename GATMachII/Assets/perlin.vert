@@ -29,7 +29,7 @@ void main()
 	float dist = 2 * max( 0, min( 0.5, 0.6-length( adjUv - vec2( 0.5, 0.5 ) ) ) );
 	float xMult = 2, yMult = 3;
 	float cutOff = 0.35 + sin(timey+adjUv.x*xMult+adjUv.y*yMult)*0.02;
-	vec4 usePosition = in_position + vec4(in_normal.xyz,0)* pow( max( cutOff, texture2D( tex, adjUv ).x*dist) , 2 )/10;
+	vec4 usePosition = in_position + vec4(in_normal.xyz,0)* pow( max( cutOff, texture2D( tex, adjUv ).x*dist) , 2 )/25;
 	
 	gl_Position = mvp*world*usePosition;
 	vWorld = world;

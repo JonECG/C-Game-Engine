@@ -11,7 +11,7 @@ struct Renderable
 	Geometry* whatGeometry;
 	Shader* howShader;
 	bool visible;
-	const Texture* texture;
+	const Texture *texture, *optionalTexture;
 
 	Renderable();
 

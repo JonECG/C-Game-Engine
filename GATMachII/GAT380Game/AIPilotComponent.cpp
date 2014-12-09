@@ -10,35 +10,45 @@ AIPilotComponent::AIPilotComponent()
 	tweenPos = glm::vec3();
 }
 
+float getAngleDiff( glm::vec3 normal, glm::vec3 source, glm::vec3 direction, glm::vec3 target )
+{
+	glm::vec3 targetPlaneProjected = target - normal*glm::dot( normal, target );
+	glm::vec3 destinationPlaneProjected = source + direction - normal*glm::dot( normal, source + direction );
+
+	float angle = std::acos( glm::dot( glm::normalize( targetPlaneProjected - source ), glm::normalize( destinationPlaneProjected - source ) ) );
+	glm::vec3 crossReference = glm::cross( normal, destinationPlaneProjected );
+	angle *= ( glm::dot( crossReference, targetPlaneProjected ) < 0 ) ? 1 : -1;
+
+	return angle;
+}
+
 void AIPilotComponent::update( float dt )
 {
 	dt;
 	if( target && parent->getStage()->hasEntity( target ) )
 	{
-		//auto myTc = parent->gc<TransformComponent>();
-		//auto tc = target->gc<TransformComponent>();
-		//auto myPc = parent->gc<PlaneComponent>();
-		//
-		//if( tweenPos == glm::vec3() )
-		//{
-		//	tweenPos = tc->getTranslation();
-		//}
+		auto myTc = parent->gc<TransformComponent>();
+		auto tc = target->gc<TransformComponent>();
+		auto myPc = parent->gc<PlaneComponent>();
+		
+		if( tweenPos == glm::vec3() )
+		{
+			tweenPos = tc->getTranslation();
+		}
 
-		//float tweenAmount = 50;
-		//tweenPos = ( tweenPos * tweenAmount + tc->getTranslation() ) / ( tweenAmount + 1 );
+		float tweenAmount = 20;
+		if( float( std::rand() )/RAND_MAX < 0.1f )
+			tweenPos = ( tweenPos * tweenAmount + tc->getTranslation() ) / ( tweenAmount + 1 );
 
-		//float neededDir = std::atan2( tweenPos.y - myTc->getTranslation().y, ( tweenPos.x - myTc->getTranslation().x ) ) * 180 / 3.1416f;
-		//float actNeededDir = std::atan2( tc->getTranslation().y - myTc->getTranslation().y, ( tc->getTranslation().x - myTc->getTranslation().x ) ) * 180 / 3.1416f;
-		//float angleDiff = (float) std::fmod(std::fmod(myPc->dir - neededDir, 360) + 540, 360) - 180;
-		//float actAngleDiff = (float) std::fmod(std::fmod(myPc->dir - actNeededDir, 360) + 540, 360) - 180;
-
-		////std::cout << neededDir << std::endl;
-
-		//myPc->dir -= std::max( -100.0f, std::min( 100.0f, angleDiff ) ) * dt;
-
-		//if( std::abs( actAngleDiff ) < 10 )
-		//{
-		//	myPc->fire();
-		//}
+		glm::vec3 planeNormal = glm::normalize( myTc->getTranslation() );
+		float angleDiff = getAngleDiff( planeNormal, myTc->getTranslation(), myPc->dir, tweenPos );
+		float actAngleDiff = getAngleDiff( planeNormal, myTc->getTranslation(), myPc->dir, tc->getTranslation() );
+		
+		myPc->turning += ( ( angleDiff > 0 ) ? 1 : -1 ) * dt * std::min( std::abs(angleDiff)/10, 0.1f );
+		
+		if( std::abs( actAngleDiff ) < 0.2f )
+		{
+			myPc->fire();
+		}
 	}
 }

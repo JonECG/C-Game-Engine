@@ -70,31 +70,50 @@ void Stage::update( float dt )
 			for( int c = 0; c < entities[i]->components->count(); c++ )
 			{
 				entities[i]->components->getInserted( c )->init();
+				entities[i]->components->getInserted( c )->inited = true;
 			}
 			entities[i]->inited = true;
+		}
+		else
+		{
+			for( int c = 0; c < entities[i]->components->count(); c++ )
+			{
+				if( !entities[i]->components->getInserted( c )->inited )
+				{
+					entities[i]->components->getInserted( c )->init();
+					entities[i]->components->getInserted( c )->inited = true;
+				}
+			}
+			
 		}
 	}
 
 	for( int i = 0; i < currentEntity; i++ )
 	{
+		if( entities[i]->inited )
 		for( int c = 0; c < entities[i]->components->count(); c++ )
 		{
+			if( entities[i]->components->getInserted( c )->inited )
 			entities[i]->components->getInserted( c )->earlyUpdate( dt );
 		}
 	}
 
 	for( int i = 0; i < currentEntity; i++ )
 	{
+		if( entities[i]->inited )
 		for( int c = 0; c < entities[i]->components->count(); c++ )
 		{
+			if( entities[i]->components->getInserted( c )->inited )
 			entities[i]->components->getInserted( c )->update( dt );
 		}
 	}
 
 	for( int i = 0; i < currentEntity; i++ )
 	{
+		if( entities[i]->inited )
 		for( int c = 0; c < entities[i]->components->count(); c++ )
 		{
+			if( entities[i]->components->getInserted( c )->inited )
 			entities[i]->components->getInserted( c )->lateUpdate( dt );
 		}
 	}
@@ -178,10 +197,11 @@ void Stage::draw()
 					{
 						iter->second->draw();
 					}*/
-					//if( entities[ i ]->inited )
+					if( entities[ i ]->inited )
 					{
 						for( int c = 0; c < entities[i]->components->count(); c++ )
 						{
+							if( entities[i]->components->getInserted( c )->inited )
 							entities[i]->components->getInserted( c )->draw();
 						}
 					}

@@ -23,8 +23,8 @@ void InputMoveComponent::update( float dt )
 	plane->turning += (uc->isKeyDown('D')?1:0) * dt * 0.1f;
 	plane->turning -= (uc->isKeyDown('A')?1:0) * dt * 0.1f;
 
-	plane->speed += (uc->isKeyDown('W')?1:0) * 10 * dt;
-	plane->speed -= (uc->isKeyDown('S')?1:0) * 10 * dt;
+	plane->speed += (uc->isKeyDown('W')?1:0) * 0.2f * dt;
+	plane->speed -= (uc->isKeyDown('S')?1:0) * 0.2f * dt;
 
 	if( uc->isKeyPressed( VK_SPACE ) )
 	{
