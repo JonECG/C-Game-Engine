@@ -45,8 +45,8 @@ void AIPilotComponent::update( float dt )
 			tweenPos = tc->getTranslation();
 		}
 
-		float tweenAmount = 20;
-		if( float( std::rand() )/RAND_MAX < 0.2f )
+		float tweenAmount = 10;
+		//if( float( std::rand() )/RAND_MAX < 0.2f )
 			tweenPos = ( tweenPos * tweenAmount + tc->getTranslation() ) / ( tweenAmount + 1 );
 
 		glm::vec3 planeNormal = glm::normalize( myTc->getTranslation() );

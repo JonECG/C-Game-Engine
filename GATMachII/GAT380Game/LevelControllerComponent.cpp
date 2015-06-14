@@ -182,7 +182,7 @@ void LevelControllerComponent::draw()
 				actLook[3][3] = 1;
 
 				g->setTransform( glm::translate( source - up * 0.002f ) * actLook * glm::scale( glm::vec3(0.02f) ) );
-				g->drawRenderable( indicator );
+				//g->drawRenderable( indicator );
 			}
 		}
 	}

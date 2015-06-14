@@ -62,8 +62,8 @@ void PlaneComponent::draw()
 	if( !parent->hasComponent<BulletComponent>() )
 	{
 		parent->getStage()->getGame()->getGraphicsHandle()->setTransform( glm::mat4() );
-		if( alignment == 0 )
-			parent->getStage()->getGame()->getGraphicsHandle()->drawText( -0.95f, 0.95f, ("Health: " + std::to_string( health )).c_str(), 0.1f );
+		//if( alignment == 0 )
+		//	parent->getStage()->getGame()->getGraphicsHandle()->drawText( -0.95f, 0.95f, ("Health: " + std::to_string( health )).c_str(), 0.1f );
 		//else
 		//	parent->getStage()->getGame()->getGraphicsHandle()->drawText( -1.0f, 0.85f, ("Enemy Health: " + std::to_string( health )).c_str(), 0.1f );
 	}
